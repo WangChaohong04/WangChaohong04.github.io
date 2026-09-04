@@ -1686,12 +1686,13 @@
           }).join('');
           const cardPositions = {
             '-3': { x: 'calc(-1 * min(46vw, 430px))', z: '-190px', rotate: '-24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
-            '-2': { x: 'calc(-1 * min(52vw, 560px))', z: '-105px', rotate: '-16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
-            '-1': { x: 'calc(-1 * min(35vw, 430px))', z: '-34px', rotate: '-8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
+            '-2': { x: 'calc(-1 * min(58vw, 620px))', z: '-105px', rotate: '-16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
+            // 相邻卡片中心距大于两张缩放后卡片半宽之和，避免线上大屏出现重叠。
+            '-1': { x: 'calc(-1 * min(40vw, 500px))', z: '-34px', rotate: '-8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
             '0': { x: '0px', z: '24px', rotate: '0deg', scale: '1', opacity: '1', blur: '0px', depth: 6 },
-            '1': { x: 'min(35vw, 430px)', z: '-34px', rotate: '8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
-            '2': { x: 'min(52vw, 560px)', z: '-105px', rotate: '16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
-            '3': { x: 'min(60vw, 640px)', z: '-190px', rotate: '24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
+            '1': { x: 'min(40vw, 500px)', z: '-34px', rotate: '8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
+            '2': { x: 'min(58vw, 620px)', z: '-105px', rotate: '16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
+            '3': { x: 'min(68vw, 720px)', z: '-190px', rotate: '24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
           };
           const segments = projectItems.map((project, index) => {
             let offset = (index - activeIndex + projectItems.length) % projectItems.length;
