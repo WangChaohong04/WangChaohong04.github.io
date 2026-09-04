@@ -1,160 +1,1846 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Chaohong Wang | 王超泓</title>
-
-    <meta name="description"
-          content="Chaohong Wang - Computer Science undergraduate at Monash University, interested in Human-Computer Interaction, AI Agents and Human-Centered AI.">
-
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome — Wang Chaohong</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            max-width: 900px;
-            margin: 60px auto;
-            padding: 0 25px;
-            line-height: 1.7;
-            color: #222;
-        }
-
-        h1 {
-            margin-bottom: 5px;
-        }
-
-        h2 {
-            margin-top: 45px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 8px;
-        }
-
-        a {
-            color: #1769aa;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .header img {
-            width: 170px;
-            height: 170px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .links {
-            margin-top: 15px;
-        }
-
-        .links a {
-            margin-right: 15px;
-        }
-
-        .project {
-            margin-bottom: 25px;
-        }
-
-        @media (max-width: 650px) {
-            .header {
-                flex-direction: column-reverse;
-                align-items: flex-start;
-            }
-        }
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      html, body { width: 100%; min-height: 100%; }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        cursor: none;
+      }
+      .stage {
+        position: relative;
+        width: 100vw;
+        height: 100dvh;
+        overflow: hidden;
+        isolation: isolate;
+        background: #000;
+      }
+      /* NoiseBackground 组件始终位于页面底层，完全不阻挡鼠标。 */
+      #noise-background {
+        position: fixed;
+        z-index: 0;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .ui-overlay {
+        position: fixed;
+        z-index: 3;
+        inset: 0;
+        pointer-events: none;
+        color: #fff;
+      }
+      .ui-interactive { pointer-events: auto; }
+      .welcome-shell {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 10vh 8vw 20vh;
+        transition: opacity 900ms cubic-bezier(.22, 1, .36, 1), transform 900ms cubic-bezier(.22, 1, .36, 1);
+      }
+      .welcome-shell.is-dismissed { opacity: 0; transform: translateY(-26px) scale(.985); }
+      .welcome-lockup { position: relative; width: min(86vw, 850px); }
+      .welcome-title {
+        margin: 0;
+        color: #fff;
+        font-size: clamp(78px, 15vw, 220px);
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: -0.095em;
+        line-height: .78;
+        text-align: center;
+        text-transform: none;
+        text-shadow: 0 10px 28px rgba(30, 53, 52, .08);
+      }
+      .welcome-name {
+        position: absolute;
+        top: clamp(22px, 4vw, 54px);
+        left: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: max-content;
+        transform: translateX(-50%);
+        font-size: clamp(16px, 1.8vw, 24px);
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: none;
+        color: rgba(239, 249, 255, .96);
+        text-shadow: 0 0 12px rgba(152, 220, 255, .48), 0 0 32px rgba(112, 163, 255, .28);
+      }
+      .welcome-name::before,
+      .welcome-name::after {
+        content: "";
+        width: clamp(28px, 5vw, 78px);
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(185, 231, 255, .74));
+        box-shadow: 0 0 10px rgba(120, 204, 255, .5);
+        opacity: .78;
+      }
+      .welcome-name::before { margin-right: clamp(12px, 1.8vw, 26px); }
+      .welcome-name::after { margin-left: clamp(12px, 1.8vw, 26px); transform: scaleX(-1); }
+      .welcome-name .letter-swap { align-items: center; }
+      @media (max-width: 480px) {
+        .welcome-name { font-size: 14px; letter-spacing: .11em; }
+        .welcome-name::before, .welcome-name::after { width: 24px; }
+      }
+      .welcome-copy {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: clamp(20px, 5vw, 74px);
+        margin: clamp(30px, 5vw, 62px) auto 0;
+        max-width: 650px;
+      }
+      .welcome-copy p {
+        max-width: 330px;
+        margin: 0;
+        color: rgba(255, 255, 255, .58);
+        font-size: clamp(12px, 1.15vw, 15px);
+        line-height: 1.55;
+      }
+      .language-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        flex: 0 0 auto;
+        padding: 5px;
+        border: 1px solid rgba(255, 255, 255, .28);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .09);
+        color: rgba(255, 255, 255, .88);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 35px rgba(0, 0, 0, .32);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        font-size: 10px;
+        letter-spacing: .12em;
+      }
+      .language-toggle > span { padding: 7px 10px; border-radius: 999px; opacity: .72; transition: .25s ease; }
+      .language-toggle > span.is-active { background: #151b1b; color: #eaf2ef; opacity: 1; }
+      .language-toggle > .letter-swap { padding: 7px 10px; border-radius: 999px; opacity: 1; color: #fff; }
+      .language-panel {
+        position: absolute;
+        top: clamp(16px, 3.5vw, 48px);
+        right: clamp(22px, 6vw, 92px);
+        transform: none;
+        min-width: 86px;
+        justify-content: center;
+      }
+      .language-panel.is-cn {
+        border-color: rgba(177, 229, 255, .65);
+        background: rgba(126, 188, 255, .16);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 0 24px rgba(115, 198, 255, .18);
+      }
+      .project-orbit {
+        position: absolute;
+        z-index: 3;
+        /* 从原来的页面中心上移约 20% 视口高度。 */
+        top: 28%;
+        left: 50%;
+        width: min(100vw, 1280px);
+        height: min(66vw, 640px);
+        transform: translate(-50%, -50%) scale(.9);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 900ms ease, transform 1200ms cubic-bezier(.22, 1, .36, 1);
+      }
+      .ui-overlay.is-awake .project-orbit {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        /* 空白区域不抢事件，下面的卡片和导航按钮单独接收鼠标。 */
+        pointer-events: none;
+      }
+      .orbit-track,
+      .wheel-ring {
+        position: absolute;
+        inset: 0;
+      }
+      .orbit-track { animation: none; }
+      .orbit-butterfly {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: clamp(25px, 3.4vw, 42px);
+        height: clamp(25px, 3.4vw, 42px);
+        transform: translate(-50%, -50%) translate(var(--rest-x), var(--rest-y)) scale(var(--rest-scale, 1));
+        transform-origin: center;
+        filter: drop-shadow(0 0 12px rgba(188, 169, 255, .86));
+        transition: opacity 2200ms ease, transform 2400ms cubic-bezier(.22, 1, .36, 1);
+      }
+      .is-expanded .orbit-butterfly { opacity: 0; transform: translate(-50%, -50%) translate(var(--rest-x), var(--rest-y)) scale(.18); }
+      /* 每只环绕蝴蝶由独立粒子组成，不使用整张图片或 SVG 填充。 */
+      .orbit-particle-butterfly { position: relative; display: block; width: 100%; height: 100%; }
+      .orbit-particle {
+        position: absolute;
+        left: var(--particle-left);
+        top: var(--particle-top);
+        width: var(--particle-size, 1.8px);
+        height: var(--particle-size, 1.8px);
+        border-radius: 50%;
+        background: var(--particle-color);
+        box-shadow: 0 0 3px var(--particle-color), 0 0 8px var(--particle-color);
+        opacity: var(--particle-opacity, .86);
+        transform: translate(-50%, -50%) scale(var(--particle-scale, 1));
+        animation: orbit-particle-twinkle var(--particle-duration, 1.8s) ease-in-out var(--particle-delay, 0s) infinite alternate;
+      }
+      .orbit-particle.core { background: #fff; box-shadow: 0 0 4px #fff, 0 0 11px #dffaff; }
+      .is-expanded .orbit-particle { animation: orbit-particle-dissolve 2.6s cubic-bezier(.22, 1, .36, 1) var(--particle-dissolve-delay, 0s) forwards; }
+      @keyframes orbit-particle-twinkle {
+        from { opacity: calc(var(--particle-opacity, .86) * .62); transform: translate(-50%, -50%) scale(calc(var(--particle-scale, 1) * .72)); }
+        to { opacity: var(--particle-opacity, .86); transform: translate(-50%, -50%) scale(calc(var(--particle-scale, 1) * 1.2)); }
+      }
+      @keyframes orbit-particle-dissolve {
+        0% { opacity: var(--particle-opacity, .86); transform: translate(-50%, -50%) scale(var(--particle-scale, 1)); filter: blur(0); }
+        58% { opacity: .34; transform: translate(calc(-50% + var(--scatter-x)), calc(-50% + var(--scatter-y))) rotate(var(--scatter-rot)) scale(.62); filter: blur(.15px); }
+        100% { opacity: 0; transform: translate(calc(-50% + var(--scatter-x)), calc(-50% + var(--scatter-y))) rotate(var(--scatter-rot)) scale(.04); filter: blur(2px); }
+      }
+      /* 六组粒子蝴蝶固定包围横向长方形，不再沿圆周旋转。 */
+      .orbit-butterfly-0 { --rest-x: calc(-1 * min(42vw, 470px)); --rest-y: -165px; --rest-scale: .9; }
+      .orbit-butterfly-1 { --rest-x: calc(-1 * min(22vw, 245px)); --rest-y: -198px; --rest-scale: .82; }
+      .orbit-butterfly-2 { --rest-x: min(22vw, 245px); --rest-y: -198px; --rest-scale: .86; }
+      .orbit-butterfly-3 { --rest-x: min(42vw, 470px); --rest-y: -165px; --rest-scale: .94; }
+      .orbit-butterfly-4 { --rest-x: min(42vw, 470px); --rest-y: 165px; --rest-scale: .82; }
+      .orbit-butterfly-5 { --rest-x: calc(-1 * min(42vw, 470px)); --rest-y: 165px; --rest-scale: .9; }
+      .orbit-particle-group { position: absolute; inset: 0; transform-origin: 72% 48%; }
+      .orbit-particle-group.upper { animation: orbit-wing-flap-upper 1.18s ease-in-out infinite; }
+      .orbit-particle-group.lower { animation: orbit-wing-flap-lower 1.18s ease-in-out infinite; }
+      .orbit-particle-group.body, .orbit-particle-group.trail { pointer-events: none; }
+      @keyframes orbit-wing-flap-upper {
+        0%, 100% { transform: rotate(5deg) scaleY(.84); }
+        50% { transform: rotate(-5deg) scaleY(1.04); }
+      }
+      @keyframes orbit-wing-flap-lower {
+        0%, 100% { transform: rotate(-5deg) scaleY(.86); }
+        50% { transform: rotate(5deg) scaleY(1.04); }
+      }
+      .wheel-ring {
+        opacity: 0;
+        transform: scale(.6);
+        perspective: 1200px;
+        transform-style: preserve-3d;
+        pointer-events: none;
+        transition: opacity 750ms ease 260ms, transform 1050ms cubic-bezier(.22, 1, .36, 1) 260ms;
+      }
+      /* 横向转盘的环境光，不放置遮住猫咪的中心毛玻璃底板。 */
+      .wheel-ring::before {
+        content: "";
+        position: absolute;
+        left: 15%;
+        right: 15%;
+        top: 35%;
+        height: 30%;
+        border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(153, 202, 255, .2), rgba(192, 146, 255, .07) 48%, transparent 75%);
+        filter: blur(28px);
+        pointer-events: none;
+      }
+      /* 转轮只负责承载视觉层，点击交给每个卡片和左右按钮本身。 */
+      .ui-overlay.is-awake .wheel-ring { opacity: 1; transform: scale(1); pointer-events: none; }
+      .wheel-segment {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: clamp(300px, 36vw, 520px);
+        height: clamp(180px, 24vw, 290px);
+        padding: clamp(22px, 2.8vw, 38px);
+        border: 1px solid rgba(223, 240, 255, .52);
+        border-radius: clamp(22px, 2.6vw, 34px);
+        background: linear-gradient(145deg, rgba(214, 241, 255, .2), rgba(165, 135, 255, .11) 55%, rgba(255, 185, 231, .16));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 0 34px rgba(113, 180, 255, .17);
+        backdrop-filter: blur(17px) saturate(120%);
+        -webkit-backdrop-filter: blur(17px) saturate(120%);
+        transform: translate(-50%, -50%) translateX(var(--card-x)) translateZ(var(--card-z)) rotateY(var(--card-rotate)) scale(var(--card-scale));
+        transform-style: preserve-3d;
+        color: rgba(244, 250, 255, .84);
+        opacity: var(--card-opacity);
+        filter: blur(var(--card-blur));
+        cursor: none;
+        transform-origin: center;
+        transition: transform 900ms cubic-bezier(.22, 1, .36, 1), opacity 700ms ease, border-color 260ms ease, background 260ms ease, box-shadow 260ms ease, filter 700ms ease;
+        pointer-events: auto;
+      }
+      .wheel-segment:hover,
+      .wheel-segment.is-active { border-color: rgba(213, 239, 255, .92); background: linear-gradient(145deg, rgba(216, 244, 255, .29), rgba(172, 148, 255, .16) 55%, rgba(255, 192, 232, .22)); box-shadow: inset 0 1px 0 rgba(255,255,255,.38), 0 0 34px rgba(130, 203, 255, .3); filter: brightness(1.15); }
+      .wheel-segment-content { display: flex; height: 100%; width: 100%; flex-direction: column; align-items: flex-start; justify-content: space-between; text-align: left; }
+      .wheel-segment-index { font-size: 10px; letter-spacing: .2em; opacity: .62; }
+      .wheel-segment-title { max-width: 230px; font-size: clamp(15px, 2vw, 26px); line-height: 1.05; letter-spacing: .06em; text-transform: uppercase; }
+      .wheel-segment-type { font-size: 9px; letter-spacing: .14em; opacity: .58; text-transform: uppercase; }
+      .wheel-open-hit {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 34%;
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        cursor: none;
+        opacity: 0;
+      }
+      .ui-overlay.is-awake .wheel-open-hit { display: none; }
+      .wheel-nav {
+        position: absolute;
+        top: 50%;
+        z-index: 12;
+        width: 54px;
+        height: 54px;
+        border: 1px solid rgba(220, 241, 255, .38);
+        border-radius: 50%;
+        background: rgba(13, 18, 35, .36);
+        color: rgba(240, 249, 255, .88);
+        font-size: 25px;
+        line-height: 1;
+        transform: translateY(-50%);
+        opacity: 0;
+        pointer-events: none;
+        cursor: none;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 0 24px rgba(121, 190, 255, .16);
+        transition: opacity 500ms ease, background 220ms ease, border-color 220ms ease;
+      }
+      .wheel-nav:hover { border-color: rgba(220, 245, 255, .88); background: rgba(47, 70, 116, .46); }
+      .wheel-nav-prev { left: clamp(6px, 1.5vw, 22px); }
+      .wheel-nav-next { right: clamp(6px, 1.5vw, 22px); }
+      .ui-overlay.is-awake .wheel-nav { opacity: 1; pointer-events: auto; }
+      .wheel-particle-field { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: visible; }
+      .wheel-particle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: var(--particle-size);
+        height: var(--particle-size);
+        border-radius: 50%;
+        background: var(--particle-color);
+        box-shadow: 0 0 8px var(--particle-color), 0 0 18px var(--particle-color);
+        opacity: 0;
+        transform: translate(-50%, -50%) translate(var(--particle-x), var(--particle-y)) scale(.72);
+        transition: opacity 700ms ease;
+        animation: particle-drift var(--particle-duration) ease-in-out var(--particle-delay) infinite alternate;
+      }
+      .ui-overlay.is-awake .wheel-particle { opacity: var(--particle-opacity); }
+      @keyframes particle-drift {
+        from { transform: translate(-50%, -50%) translate(var(--particle-x), var(--particle-y)) scale(.72); }
+        to { transform: translate(-50%, -50%) translate(var(--particle-x2), var(--particle-y2)) scale(1.12); }
+      }
+      .wheel-caption {
+        position: absolute;
+        left: 50%;
+        bottom: 2%;
+        transform: translateX(-50%);
+        color: rgba(232, 245, 255, .56);
+        font-size: 9px;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        opacity: 0;
+        transition: opacity 500ms ease 700ms;
+        white-space: nowrap;
+      }
+      .is-expanded .wheel-caption { opacity: 1; }
+      .project-detail-layer {
+        position: fixed;
+        z-index: 30;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: clamp(20px, 5vw, 72px);
+        background: rgba(0, 0, 0, .72);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        backdrop-filter: blur(18px) saturate(120%);
+        -webkit-backdrop-filter: blur(18px) saturate(120%);
+        transition: opacity 450ms ease, visibility 0s linear 450ms;
+      }
+      .project-detail-layer.is-visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+      }
+      .project-detail-card {
+        position: relative;
+        width: min(920px, 88vw);
+        min-height: min(560px, 68vh);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        padding: clamp(26px, 5vw, 68px);
+        border: 1px solid rgba(215, 239, 255, .48);
+        border-radius: clamp(24px, 4vw, 42px);
+        background: linear-gradient(140deg, rgba(20, 33, 50, .72), rgba(73, 43, 100, .34) 52%, rgba(11, 18, 35, .78));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 24px 100px rgba(67, 125, 255, .2), 0 0 80px rgba(244, 109, 204, .1);
+        transform: translateY(24px) scale(.96);
+        transition: transform 650ms cubic-bezier(.22, 1, .36, 1);
+      }
+      .project-detail-layer.is-visible .project-detail-card { transform: translateY(0) scale(1); }
+      .project-detail-card::before,
+      .project-detail-card::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(4px);
+      }
+      .project-detail-card::before {
+        width: 42%;
+        aspect-ratio: 1;
+        top: -24%;
+        right: -7%;
+        background: radial-gradient(circle, rgba(102, 217, 255, .24), transparent 68%);
+      }
+      .project-detail-card::after {
+        width: 38%;
+        aspect-ratio: 1;
+        bottom: -27%;
+        left: -8%;
+        background: radial-gradient(circle, rgba(255, 67, 167, .2), transparent 68%);
+      }
+      .project-detail-top,
+      .project-detail-main,
+      .project-detail-footer { position: relative; z-index: 1; }
+      .project-detail-top { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+      .project-detail-kicker,
+      .project-detail-meta,
+      .project-detail-footer { color: rgba(222, 241, 255, .58); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+      .project-detail-close {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border: 1px solid rgba(220, 241, 255, .35);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .08);
+        color: rgba(244, 250, 255, .86);
+        font-size: 10px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        cursor: none;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: background 220ms ease, border-color 220ms ease;
+      }
+      .project-detail-close:hover { border-color: rgba(220, 245, 255, .84); background: rgba(76, 125, 184, .28); }
+      .project-detail-main { max-width: 720px; margin: clamp(56px, 10vh, 112px) 0; }
+      .project-detail-index { margin: 0 0 18px; color: rgba(157, 221, 255, .76); font-size: clamp(12px, 1.3vw, 16px); letter-spacing: .2em; }
+      .project-detail-title { margin: 0; color: #f8fcff; font-size: clamp(48px, 9vw, 124px); font-weight: 780; font-style: italic; letter-spacing: -.08em; line-height: .84; text-transform: uppercase; text-shadow: 0 0 34px rgba(150, 219, 255, .22); }
+      .project-detail-description { max-width: 540px; margin: clamp(28px, 5vw, 48px) 0 0; color: rgba(237, 246, 255, .72); font-size: clamp(14px, 1.35vw, 18px); line-height: 1.7; }
+      .project-project-list { display: grid; justify-items: start; }
+      .project-external-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: clamp(24px, 4vw, 38px);
+        padding: 13px 17px;
+        border: 1px solid rgba(199, 226, 255, .42);
+        border-radius: 999px;
+        background: rgba(121, 104, 255, .14);
+        color: rgba(244, 250, 255, .92);
+        font-size: 11px;
+        letter-spacing: .12em;
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: border-color 220ms ease, background 220ms ease, transform 220ms ease;
+      }
+      .project-external-link:hover { border-color: rgba(214, 240, 255, .88); background: rgba(121, 104, 255, .28); transform: translateY(-2px); }
+      .project-contact-list { display: grid; gap: 12px; max-width: 520px; margin-top: clamp(24px, 4vw, 38px); }
+      .project-contact-row { display: flex; align-items: baseline; gap: 18px; padding: 14px 0; border-bottom: 1px solid rgba(220, 241, 255, .16); color: rgba(237, 246, 255, .84); font-size: clamp(14px, 1.25vw, 17px); }
+      .project-contact-label { min-width: 76px; color: rgba(157, 221, 255, .72); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+      .project-contact-value { color: rgba(248, 252, 255, .92); text-decoration: none; }
+      .project-contact-value:hover { color: #9fe6ff; }
+      .project-detail-footer { display: flex; justify-content: space-between; gap: 18px; }
+      @media (max-width: 720px) {
+        .project-orbit { top: 31%; width: 100vw; height: min(70vw, 400px); }
+        .wheel-segment { width: clamp(190px, 45vw, 300px); height: clamp(118px, 28vw, 182px); padding: 18px 20px; }
+        .wheel-nav { width: 42px; height: 42px; font-size: 20px; }
+        .orbit-butterfly-0 { --rest-x: -190px; --rest-y: 0; }
+        .orbit-butterfly-1 { --rest-x: -110px; --rest-y: -136px; }
+        .orbit-butterfly-2 { --rest-x: 110px; --rest-y: -136px; }
+        .orbit-butterfly-3 { --rest-x: 190px; --rest-y: 0; }
+        .orbit-butterfly-4 { --rest-x: 110px; --rest-y: 136px; }
+        .orbit-butterfly-5 { --rest-x: -110px; --rest-y: 136px; }
+        .project-detail-card { min-height: min(520px, 78vh); }
+        .project-detail-main { margin: 44px 0; }
+        .project-detail-footer { flex-direction: column; }
+      }
+      .bottom-note {
+        position: absolute;
+        left: clamp(22px, 5vw, 76px);
+        bottom: clamp(24px, 4vw, 54px);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(21, 27, 27, .56);
+        font-size: 10px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+      .bottom-note::before { content: ""; width: 28px; height: 1px; background: currentColor; }
+      .letter-swap {
+        display: inline-flex;
+        cursor: none;
+        white-space: pre;
+      }
+      .letter-swap-char {
+        position: relative;
+        display: inline-block;
+        height: 1em;
+        min-width: .18em;
+        overflow: hidden;
+        vertical-align: bottom;
+      }
+      .letter-swap-measure { display: block; visibility: hidden; white-space: pre; }
+      .letter-swap-glyph {
+        position: absolute;
+        inset: 0;
+        display: block;
+        transform: translateY(0%);
+        backface-visibility: hidden;
+      }
+      .letter-swap-glyph.next { transform: translateY(105%); }
+      .letter-swap.is-active .letter-swap-glyph.current { animation: letter-swap-out var(--swap-duration) cubic-bezier(.76,0,.24,1) var(--swap-delay) both; }
+      .letter-swap.is-active .letter-swap-glyph.next { animation: letter-swap-in var(--swap-duration) cubic-bezier(.76,0,.24,1) var(--swap-delay) both; }
+      .letter-swap.is-reverse.is-active .letter-swap-glyph.current { animation-name: letter-swap-out-reverse; }
+      .letter-swap.is-reverse.is-active .letter-swap-glyph.next { animation-name: letter-swap-in-reverse; }
+      @keyframes letter-swap-out { from { transform: translateY(0%); } to { transform: translateY(-105%); } }
+      @keyframes letter-swap-in { from { transform: translateY(105%); } to { transform: translateY(0%); } }
+      @keyframes letter-swap-out-reverse { from { transform: translateY(0%); } to { transform: translateY(105%); } }
+      @keyframes letter-swap-in-reverse { from { transform: translateY(-105%); } to { transform: translateY(0%); } }
+      @media (max-width: 720px) {
+        .welcome-copy { align-items: center; flex-direction: column; gap: 18px; }
+        .welcome-copy p { text-align: center; }
+        .language-panel { right: 22px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .welcome-shell { transition: none; }
+        .letter-swap.is-active .letter-swap-glyph { animation: none; }
+      }
+      .cat-wrap {
+        position: absolute;
+        z-index: 2;
+        left: 50%;
+        bottom: 0;
+        width: min(54vw, 620px);
+        height: min(83dvh, 680px);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+      .cat-wrap::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -2%;
+        width: 58%;
+        height: 5%;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: rgba(88, 167, 255, 0.18);
+        filter: blur(28px);
+        pointer-events: none;
+      }
+      #cat {
+        width: 100%;
+        max-width: 620px;
+        aspect-ratio: 1;
+        background-image: url("./sprite.webp");
+        background-repeat: no-repeat;
+        background-size: 1800% 700%;
+        background-position: 70.58823529411765% 0%;
+        filter: drop-shadow(0 20px 30px rgba(35, 118, 255, 0.24));
+      }
+      /* Three.js 粒子蝴蝶：全屏画布不拦截转盘、按钮和猫咪的交互。 */
+      #particle-butterfly {
+        position: fixed;
+        z-index: 4;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 180ms ease;
+      }
+      #particle-butterfly.is-visible { opacity: 1; }
+      @media (max-width: 720px) {
+        .cat-wrap { width: min(92vw, 520px); height: min(72dvh, 540px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #noise-background { display: none; }
+        #particle-butterfly { display: none; }
+      }
     </style>
-</head>
+  </head>
+  <body>
+    <main class="stage" aria-label="鼠标方向控制的水晶猫咪">
+      <canvas id="noise-background" aria-hidden="true"></canvas>
+      <div id="react-ui-root"></div>
+      <div class="cat-wrap">
+        <div id="cat" role="img" aria-label="会根据鼠标方向转头的水晶猫咪"></div>
+      </div>
+      <canvas id="particle-butterfly" aria-hidden="true"></canvas>
+    </main>
 
-<body>
+    <script>
+      /*
+       * NoiseBackground：静态 HTML 中的全屏 Canvas 组件。
+       * colors、speed、disturbance 都是公开配置，可直接微调。
+       */
+      function NoiseBackground({
+        canvasId = 'noise-background',
+        colors = ['#ff9ecf', '#c5a6ff', '#a7f3d0', '#9edbff'],
+        speed = 0.00034,
+        disturbance = 0.34,
+        trailLifetime = 2000,
+      } = {}) {
+        const canvas = document.getElementById(canvasId);
+        const context = canvas.getContext('2d', { alpha: false });
+        const simplex = new SimplexNoise();
+        const pointer = { x: 0, y: 0, easedX: 0, easedY: 0, active: false, lastMovedAt: 0 };
+        const trails = [];
+        const sparkles = [];
+        const stars = [];
+        let width = 0;
+        let height = 0;
+        let devicePixelRatio = 1;
+        let seed = 9137;
 
-<div class="header">
+        function seededRandom() {
+          seed = (seed * 1664525 + 1013904223) >>> 0;
+          return seed / 4294967296;
+        }
 
-    <div>
-        <h1>Chaohong Wang 王超泓</h1>
+        // 光斑基准位置；Simplex Noise 会驱动它们自然蠕动。
+        const blobs = colors.map((color, index) => ({
+          color,
+          x: 0.16 + (index / Math.max(colors.length - 1, 1)) * 0.68,
+          y: 0.22 + ((index * 0.19) % 0.58),
+          radius: 0.18 + (index % 3) * 0.035,
+          phase: index * 13.7,
+        }));
 
-        <p>
-            Computer Science Undergraduate<br>
-            Monash University Malaysia
-        </p>
+        // 星空本身一直存在于内存，但只有被鼠标轨迹“擦过”的星点才会显示。
+        for (let index = 0; index < 280; index += 1) {
+          stars.push({
+            x: seededRandom(),
+            y: seededRandom(),
+            radius: 0.45 + seededRandom() * 1.8,
+            color: colors[index % colors.length],
+            phase: seededRandom() * 80,
+            revealedUntil: 0,
+            revealPower: 0,
+          });
+        }
 
-        <div class="links">
-            <a href="https://github.com/WangChaohong04">GitHub</a>
-            <a href="#">CV</a>
-            <a href="#">Google Scholar</a>
-            <a href="#">LinkedIn</a>
-        </div>
-    </div>
+        function resize() {
+          devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+          width = window.innerWidth;
+          height = window.innerHeight;
+          canvas.width = Math.floor(width * devicePixelRatio);
+          canvas.height = Math.floor(height * devicePixelRatio);
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+          context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+        }
 
-</div>
+        function setPointer(x, y) {
+          if (!pointer.active) {
+            pointer.easedX = x;
+            pointer.easedY = y;
+          }
+          pointer.x = x;
+          pointer.y = y;
+          pointer.active = true;
+          pointer.lastMovedAt = performance.now();
+          const previous = trails[trails.length - 1];
+          if (!previous || Math.hypot(x - previous.x, y - previous.y) > 8) {
+            trails.push({ x, y, createdAt: pointer.lastMovedAt, seed: Math.random() * 50 });
+          }
+          stars.forEach((star) => {
+            const distance = Math.hypot(x - star.x * width, y - star.y * height);
+            const revealRadius = Math.min(width, height) * 0.16;
+            if (distance < revealRadius) {
+              const power = 1 - distance / revealRadius;
+              star.revealedUntil = pointer.lastMovedAt + trailLifetime;
+              star.revealPower = Math.max(star.revealPower, power);
+            }
+          });
+          for (let index = 0; index < 3; index += 1) {
+            sparkles.push({
+              x: x + (seededRandom() - 0.5) * 26,
+              y: y + (seededRandom() - 0.5) * 26,
+              radius: 0.8 + seededRandom() * 2.4,
+              createdAt: pointer.lastMovedAt,
+              color: colors[index % colors.length],
+            });
+          }
+          while (sparkles.length > 220) sparkles.shift();
+          while (trails.length > 80) trails.shift();
+        }
 
+        function drawGlow(x, y, radius, color, alpha) {
+          const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+          gradient.addColorStop(0, `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`);
+          gradient.addColorStop(0.42, `${color}${Math.round(alpha * 130).toString(16).padStart(2, '0')}`);
+          gradient.addColorStop(1, `${color}00`);
+          context.fillStyle = gradient;
+          context.beginPath();
+          context.arc(x, y, radius, 0, Math.PI * 2);
+          context.fill();
+        }
 
-<h2>About Me</h2>
+        function drawStar(x, y, radius, color, alpha) {
+          context.globalAlpha = alpha;
+          context.fillStyle = color;
+          context.beginPath();
+          context.arc(x, y, radius, 0, Math.PI * 2);
+          context.fill();
+          context.globalAlpha = 1;
+        }
 
-<p>
-I am a Computer Science undergraduate at Monash University Malaysia.
-My interests lie at the intersection of Human-Computer Interaction,
-Human-Centered AI, AI Agents, and Educational Technology.
-</p>
+        // Galaxy 旋涡：沿鼠标经过的每个采样点生成短暂的梵高式弧线，
+        // 复用 Splash Cursor 的“速度注入 + 湍流扩散”观感，但不在鼠标未触碰处绘制。
+        function drawGalaxySwirl(trail, now, index) {
+          const life = Math.max(0, 1 - (now - trail.createdAt) / trailLifetime);
+          if (life <= 0) return;
+          const baseAngle = trail.seed * 0.37 + index * 0.18;
+          const swirlScale = 18 + (index % 5) * 7;
+          context.save();
+          context.globalCompositeOperation = 'screen';
+          context.lineCap = 'round';
+          for (let strand = 0; strand < 3; strand += 1) {
+            context.beginPath();
+            for (let step = 0; step <= 22; step += 1) {
+              const progress = step / 22;
+              const angle = baseAngle + progress * (2.15 + strand * .16) + now * .00012 * (strand % 2 ? -1 : 1);
+              const radius = progress * swirlScale * (1.15 + life * .85) + strand * 5;
+              const turbulence = simplex.noise2D(trail.seed + strand * 9, progress * 3.4 + now * .00045) * 8 * progress;
+              const x = trail.x + Math.cos(angle) * (radius + turbulence);
+              const y = trail.y + Math.sin(angle) * (radius * .58 + turbulence * .6);
+              if (step === 0) context.moveTo(x, y); else context.lineTo(x, y);
+            }
+            context.strokeStyle = colors[(index + strand) % colors.length];
+            context.globalAlpha = .16 * life * (1 - strand * .18);
+            context.lineWidth = 1.2 + (2 - strand) * .55;
+            context.stroke();
+          }
+          context.restore();
+        }
 
+        function render(now) {
+          pointer.easedX += (pointer.x - pointer.easedX) * 0.085;
+          pointer.easedY += (pointer.y - pointer.easedY) * 0.085;
+          context.clearRect(0, 0, width, height);
+          // 页面基底保持纯黑，只有鼠标轨迹上的流体、星点与光晕被逐步唤醒。
+          context.fillStyle = '#000';
+          context.fillRect(0, 0, width, height);
 
-<h2>Research Interests</h2>
+          const recentActivity = Math.max(0, 1 - (now - pointer.lastMovedAt) / trailLifetime);
+          const liveTrails = trails.filter((trail) => now - trail.createdAt < trailLifetime);
+          trails.splice(0, trails.length, ...liveTrails);
+          const liveSparkles = sparkles.filter((sparkle) => now - sparkle.createdAt < trailLifetime);
+          sparkles.splice(0, sparkles.length, ...liveSparkles);
+          if (recentActivity <= 0 && liveTrails.length === 0 && liveSparkles.length === 0) {
+            requestAnimationFrame(render);
+            return;
+          }
 
-<p>
-Human-Computer Interaction (HCI) · Human-Centered AI ·
-AI Agents · Educational Technology · Multimodal Interaction
-</p>
+          context.save();
+          context.globalCompositeOperation = 'screen';
+          context.filter = `blur(${Math.max(18, Math.min(width, height) * 0.035)}px)`;
 
+          // 大光斑受 eased mouse 牵引；鼠标停止后整体亮度在 1 秒内归零。
+          blobs.forEach((blob, index) => {
+            const noiseX = simplex.noise2D(blob.phase + now * speed, index * 1.9) * width * 0.08;
+            const noiseY = simplex.noise2D(index * 2.7, blob.phase + now * speed * 0.82) * height * 0.08;
+            const pullX = (pointer.easedX - width * blob.x) * disturbance;
+            const pullY = (pointer.easedY - height * blob.y) * disturbance;
+            const x = width * blob.x + noiseX + pullX * 0.16;
+            const y = height * blob.y + noiseY + pullY * 0.16;
+            const radius = Math.min(width, height) * blob.radius * (0.78 + simplex.noise2D(blob.phase, now * speed) * 0.12);
+            drawGlow(x, y, radius, blob.color, 0.18 * recentActivity);
+          });
 
-<h2>Research & Projects</h2>
+          // 星点与光晕共享同一条短暂轨迹，停止移动后最多 2 秒回到纯黑。
+          stars.forEach((star) => {
+            const remaining = Math.max(0, (star.revealedUntil - now) / trailLifetime);
+            if (remaining <= 0) {
+              star.revealPower *= 0.92;
+              return;
+            }
+            const twinkle = 0.72 + simplex.noise2D(star.phase, now * speed * 2.2) * 0.18;
+            const x = star.x * width;
+            const y = star.y * height;
+            drawGlow(x, y, star.radius * 10, star.color, 0.18 * star.revealPower * remaining);
+            context.filter = 'none';
+            drawStar(x, y, star.radius, star.color, 0.72 * star.revealPower * remaining * twinkle);
+            context.filter = `blur(${Math.max(18, Math.min(width, height) * 0.035)}px)`;
+          });
 
-<div class="project">
-    <strong>AI Agent Evaluation</strong><br>
-    Evaluating AI agents on long-horizon procurement tasks,
-    including planning, information retrieval, evidence quality,
-    and task completion.
-</div>
+          // 鼠标轨迹是短暂的流体尾迹，超过 1000ms 会完全清除回黑色。
+          liveTrails.forEach((trail, index) => {
+            const age = now - trail.createdAt;
+            const life = Math.max(0, 1 - age / trailLifetime);
+            const color = colors[index % colors.length];
+            const wobble = simplex.noise2D(trail.seed, now * speed * 1.6) * 14 * disturbance;
+            const radius = (24 + (index % 4) * 8) * (0.65 + life * 0.7);
+            drawGlow(trail.x + wobble, trail.y - wobble * 0.45, radius, color, 0.42 * life);
+            drawGalaxySwirl(trail, now, index);
+          });
+          liveSparkles.forEach((sparkle) => {
+            const life = Math.max(0, 1 - (now - sparkle.createdAt) / trailLifetime);
+            drawGlow(sparkle.x, sparkle.y, 16 + sparkle.radius * 5, sparkle.color, 0.22 * life);
+            context.filter = 'none';
+            drawStar(sparkle.x, sparkle.y, sparkle.radius * life, sparkle.color, 0.7 * life);
+            context.filter = `blur(${Math.max(18, Math.min(width, height) * 0.035)}px)`;
+          });
+          context.restore();
+          requestAnimationFrame(render);
+        }
 
-<div class="project">
-    <strong>AllPlay — AI Social Story Generation</strong><br>
-    Exploring AI-assisted generation of personalised social stories
-    for education and human-AI interaction.
-</div>
+        window.addEventListener('resize', resize, { passive: true });
+        resize();
+        requestAnimationFrame(render);
+        return { canvas, colors, speed, disturbance, trailLifetime, setPointer };
+      }
 
-<div class="project">
-    <strong>Embodied AI Agent Platform</strong><br>
-    Exploring ESP32, computer vision, robotic interaction,
-    and multimodal AI agents.
-</div>
+      // 2D Simplex Noise：用于流体光斑的自然蠕动，不依赖外部 CDN。
+      class SimplexNoise {
+        constructor() {
+          const permutation = [
+            151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
+            8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
+            35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,
+            134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,
+            41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,
+            89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,
+            226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,
+            17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,
+            155,167,43,172,9,129,22,39,253,19,98,108,79,113,224,232,178,185,112,104,
+            218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,
+            249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,
+            127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,
+            61,156,180,
+          ];
+          this.permutation = permutation.concat(permutation);
+          this.gradients = [[1,1],[-1,1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[0,-1]];
+        }
 
+        noise2D(x, y) {
+          const skew = (x + y) * 0.3660254037844386;
+          const i = Math.floor(x + skew);
+          const j = Math.floor(y + skew);
+          const unskew = (i + j) * 0.21132486540518713;
+          const x0 = x - (i - unskew);
+          const y0 = y - (j - unskew);
+          const i1 = x0 > y0 ? 1 : 0;
+          const j1 = x0 > y0 ? 0 : 1;
+          const x1 = x0 - i1 + 0.21132486540518713;
+          const y1 = y0 - j1 + 0.21132486540518713;
+          const x2 = x0 - 1 + 0.42264973081037427;
+          const y2 = y0 - 1 + 0.42264973081037427;
+          const ii = i & 255;
+          const jj = j & 255;
+          const contribution = (dx, dy, gi) => {
+            const t = 0.5 - dx * dx - dy * dy;
+            if (t < 0) return 0;
+            const gradient = this.gradients[gi & 7];
+            return t * t * t * t * (gradient[0] * dx + gradient[1] * dy);
+          };
+          const gi0 = this.permutation[ii + this.permutation[jj]];
+          const gi1 = this.permutation[ii + i1 + this.permutation[jj + j1]];
+          const gi2 = this.permutation[ii + 1 + this.permutation[jj + 1]];
+          return 70 * (contribution(x0, y0, gi0) + contribution(x1, y1, gi1) + contribution(x2, y2, gi2));
+        }
+      }
 
-<h2>Publications</h2>
+      const noiseBackground = NoiseBackground({
+        // Galaxy / Van Gogh 星空调色：纯黑底，只有鼠标触碰路径唤醒紫蓝星尘。
+        colors: ['#4c28ff', '#1977ff', '#9b62ff', '#62eaff', '#ef6dff'],
+        speed: 0.00042,
+        disturbance: 0.42,
+        trailLifetime: 2000,
+      });
 
-<p>
-Coming soon.
-</p>
+      const cat = document.querySelector('#cat');
+      /*
+       * ParticleButterfly：用 Three.js 点精灵组成蝴蝶，而不是一张 SVG 图片。
+       * particleCount / trailPoolSize / trailLength / wingFlapSpeed / followEase 都是可调参数。
+       * 蝴蝶本体由轮廓、翅脉、填充粒子和身体核心组成；尾迹则沿鼠标路径逐点阻尼跟随。
+       */
+      const particleButterfly = (() => {
+        const canvas = document.querySelector('#particle-butterfly');
+        // 颜色顺序：白色核心 → Cyan / Electric Blue → Magenta → Deep Purple。
+        const palette = ['#ffffff', '#00e5ff', '#5e89ff', '#ff2d95', '#7000ff'];
+        const trailLength = 30;
+        // 尾迹使用循环对象池，避免鼠标移动时不断创建和销毁对象。
+        const trailPoolSize = 1200;
+        const wingFlapSpeed = 7.2;
+        const followEase = 0.18;
+        const seeded = (value) => {
+          const x = Math.sin(value * 12.9898 + 78.233) * 43758.5453;
+          return x - Math.floor(x);
+        };
 
+        function canvasFallback() {
+          const context = canvas.getContext('2d');
+          const pointer = { x: innerWidth * .5, y: innerHeight * .5, easedX: innerWidth * .5, easedY: innerHeight * .5, active: false };
+          const trail = Array.from({ length: trailLength }, () => ({ x: pointer.x, y: pointer.y }));
+          const resize = () => {
+            canvas.width = Math.max(1, Math.floor(innerWidth * devicePixelRatio));
+            canvas.height = Math.max(1, Math.floor(innerHeight * devicePixelRatio));
+            context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+          };
+          const move = (x, y) => {
+            pointer.x = x;
+            pointer.y = y;
+            pointer.active = true;
+            canvas.classList.add('is-visible');
+          };
+          const draw = (time) => {
+            pointer.easedX += (pointer.x - pointer.easedX) * followEase;
+            pointer.easedY += (pointer.y - pointer.easedY) * followEase;
+            trail[0].x += (pointer.easedX - trail[0].x) * .34;
+            trail[0].y += (pointer.easedY - trail[0].y) * .34;
+            for (let index = 1; index < trail.length; index += 1) {
+              trail[index].x += (trail[index - 1].x - trail[index].x) * (.25 - index * .003);
+              trail[index].y += (trail[index - 1].y - trail[index].y) * (.25 - index * .003);
+            }
+            context.clearRect(0, 0, innerWidth, innerHeight);
+            if (pointer.active) {
+              trail.forEach((point, index) => {
+                const alpha = Math.pow(1 - index / trail.length, 1.7) * .7;
+                const radius = 1.3 + (1 - index / trail.length) * 2.2;
+                context.fillStyle = `rgba(155, 200, 255, ${alpha})`;
+                context.shadowBlur = 12;
+                context.shadowColor = '#c7a8ff';
+                context.beginPath();
+                context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+                context.fill();
+              });
+              const flap = 1 + Math.sin(time * .008 * wingFlapSpeed) * .08;
+              const drawWing = (side, upper) => {
+                context.beginPath();
+                context.moveTo(pointer.easedX, pointer.easedY);
+                context.bezierCurveTo(pointer.easedX + side * 14, pointer.easedY + (upper ? 18 : -7), pointer.easedX + side * 34, pointer.easedY + (upper ? 35 : -28), pointer.easedX + side * (upper ? 29 : 20), pointer.easedY + (upper ? 46 : -34));
+                context.strokeStyle = upper ? `rgba(245, 169, 232, .9)` : `rgba(139, 220, 255, .85)`;
+                context.lineWidth = 1.3;
+                context.shadowBlur = 18;
+                context.shadowColor = '#b89cff';
+                context.stroke();
+                for (let particle = 0; particle < 24; particle += 1) {
+                  const progress = seeded(particle + side * 17 + (upper ? 2 : 31));
+                  const x = pointer.easedX + side * (4 + progress * (upper ? 29 : 21));
+                  const y = pointer.easedY + (upper ? 5 + Math.sin(progress * Math.PI) * 34 : -4 - Math.sin(progress * Math.PI) * 27) + (seeded(particle + 91) - .5) * 13;
+                  context.fillStyle = palette[(particle + (upper ? 1 : 0)) % palette.length];
+                  context.globalAlpha = .65 + seeded(particle + 4) * .35;
+                  context.beginPath();
+                  context.arc(x, y, .7 + seeded(particle + 8) * 1.25, 0, Math.PI * 2);
+                  context.fill();
+                }
+              };
+              context.globalAlpha = 1;
+              context.shadowBlur = 0;
+              drawWing(-1, true); drawWing(1, true); drawWing(-1, false); drawWing(1, false);
+              context.strokeStyle = '#e9f6ff';
+              context.lineWidth = 2;
+              context.beginPath();
+              context.moveTo(pointer.easedX, pointer.easedY - 19);
+              context.lineTo(pointer.easedX, pointer.easedY + 18);
+              context.stroke();
+            }
+            requestAnimationFrame(draw);
+          };
+          resize();
+          canvas.dataset.renderer = 'canvas-fallback';
+          canvas.dataset.particleCount = '120';
+          window.addEventListener('resize', resize);
+          window.__particleButterflyState = { renderer: 'canvas-fallback', trailLength, particleCount: 120, rendered: true };
+          requestAnimationFrame(draw);
+          return { move };
+        }
 
-<h2>Experience</h2>
+        if (!canvas || !window.THREE) {
+          console.warn('Three.js 未加载，粒子蝴蝶已切换为 Canvas 兼容渲染。');
+          return canvasFallback();
+        }
 
-<p>
-Research and project experience in Human-Computer Interaction,
-AI systems, and intelligent interactive technologies.
-</p>
+        const THREE = window.THREE;
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setClearColor(0x000000, 0);
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-innerWidth / 2, innerWidth / 2, innerHeight / 2, -innerHeight / 2, 1, 1000);
+        camera.position.z = 10;
+        const butterflyMasterGroup = new THREE.Group();
+        const butterflyGroup = butterflyMasterGroup;
+        const bodyPoints = new THREE.Group();
+        const leftWingGroup = new THREE.Group();
+        const rightWingGroup = new THREE.Group();
+        const particleRenderGroup = new THREE.Group();
+        butterflyMasterGroup.add(bodyPoints, leftWingGroup, rightWingGroup, particleRenderGroup);
+        scene.add(butterflyMasterGroup);
+        const butterflyParticles = [];
 
+        const cubic = (a, b, c, d, t) => {
+          const inverse = 1 - t;
+          return {
+            x: inverse ** 3 * a.x + 3 * inverse ** 2 * t * b.x + 3 * inverse * t ** 2 * c.x + t ** 3 * d.x,
+            y: inverse ** 3 * a.y + 3 * inverse ** 2 * t * b.y + 3 * inverse * t ** 2 * c.y + t ** 3 * d.y,
+          };
+        };
+        const pushParticle = (x, y, side, phase, colorIndex, z = 0, hingeY = 0, wingType = 0) => {
+          butterflyParticles.push({ x, y, z, side, phase, colorIndex, hingeY, wingType });
+        };
+        const addCurve = (a, b, c, d, samples, side, phaseOffset, colorIndex, hingeY = 0, wingType = 0) => {
+          for (let index = 0; index < samples; index += 1) {
+            const progress = index / Math.max(1, samples - 1);
+            const point = cubic(a, b, c, d, progress);
+            const jitter = index % 3 === 0 ? (seeded(index + phaseOffset) - .5) * 1.1 : 0;
+            const depth = (seeded(index + phaseOffset * 3.17) - .5) * (wingType ? 1.8 : .8);
+            pushParticle(point.x + jitter, point.y + jitter, side, phaseOffset + index * .17, colorIndex + index % 2, depth, hingeY, wingType);
+          }
+        };
 
-<h2>Contact</h2>
+        // 正面展开的四翅构图：左右完全镜像，蝶身居中，动态尾流交给独立粒子池。
+        // 前翅约 1.6 x 1.2，后翅约 1.1 x 0.8（相对于身体长度 1.0）。
+        const wingPoint = (side, x, y) => ({ x: side * x, y });
+        const addFrontWing = (side, upper, wingType) => {
+          const hingeY = upper ? 8 : -7;
+          const phaseBase = (side > 0 ? 0 : 180) + (upper ? 11 : 211);
+          const colorBase = upper ? 1 : 2;
+          if (upper) {
+            // 前翅：根部向外上方展开，闭合轮廓由三段曲线和八条翅脉组成。
+            addCurve(wingPoint(side, 5, 7), wingPoint(side, 17, 26), wingPoint(side, 47, 72), wingPoint(side, 73, 67), 34, side, phaseBase, colorBase, hingeY, wingType);
+            addCurve(wingPoint(side, 73, 67), wingPoint(side, 78, 51), wingPoint(side, 70, 18), wingPoint(side, 57, 8), 28, side, phaseBase + 43, colorBase + 1, hingeY, wingType);
+            addCurve(wingPoint(side, 57, 8), wingPoint(side, 39, 2), wingPoint(side, 17, 3), wingPoint(side, 5, 7), 22, side, phaseBase + 79, colorBase + 2, hingeY, wingType);
+            for (let rib = 0; rib < 8; rib += 1) {
+              const t = rib / 7;
+              const endX = 16 + t * 52;
+              const endY = 18 + Math.sin(t * Math.PI * .88) * 47;
+              addCurve(wingPoint(side, 6, 8), wingPoint(side, 15 + t * 8, 17 + t * 9), wingPoint(side, endX - 7, endY - 9), wingPoint(side, endX, endY), 12, side, phaseBase + 100 + rib, rib % 3, hingeY, wingType);
+            }
+          } else {
+            // 后翅：更圆、更低，和前翅共同形成四瓣对称轮廓。
+            addCurve(wingPoint(side, 5, -7), wingPoint(side, 20, -12), wingPoint(side, 50, -26), wingPoint(side, 58, -39), 28, side, phaseBase, colorBase, hingeY, wingType);
+            addCurve(wingPoint(side, 58, -39), wingPoint(side, 56, -53), wingPoint(side, 35, -59), wingPoint(side, 9, -48), 24, side, phaseBase + 37, colorBase + 1, hingeY, wingType);
+            addCurve(wingPoint(side, 9, -48), wingPoint(side, 4, -35), wingPoint(side, 3, -17), wingPoint(side, 5, -7), 18, side, phaseBase + 69, colorBase + 2, hingeY, wingType);
+            for (let rib = 0; rib < 6; rib += 1) {
+              const t = rib / 5;
+              const endX = 12 + t * 39;
+              const endY = -15 - Math.sin(t * Math.PI * .9) * 31;
+              addCurve(wingPoint(side, 6, -7), wingPoint(side, 15 + t * 8, -13 - t * 8), wingPoint(side, endX - 5, endY + 7), wingPoint(side, endX, endY), 11, side, phaseBase + 89 + rib, (rib + 1) % 3, hingeY, wingType);
+            }
+          }
+          const fillCount = upper ? 116 : 82;
+          for (let particle = 0; particle < fillCount; particle += 1) {
+            const progress = seeded(particle + (upper ? 701 : 801) + (side > 0 ? 0 : 23));
+            const depthJitter = (seeded(particle + 901 + (upper ? 0 : 73)) - .5) * (upper ? 2.8 : 2.2);
+            const x = 7 + progress * (upper ? 60 : 45);
+            const centerY = upper ? 8 + Math.sin(progress * Math.PI * .9) * 46 : -7 - Math.sin(progress * Math.PI * .92) * 29;
+            const thickness = upper ? 3 + Math.sin(progress * Math.PI) * 11 : 3 + Math.sin(progress * Math.PI) * 9;
+            const y = centerY + (seeded(particle + 971 + (upper ? 0 : 29)) - .5) * thickness * 2;
+            pushParticle(side * x, y, side, particle * .19 + wingType, (particle % 3) + 1, depthJitter, hingeY, wingType);
+          }
+        };
+        addFrontWing(-1, true, 1);
+        addFrontWing(1, true, 1);
+        addFrontWing(-1, false, 2);
+        addFrontWing(1, false, 2);
 
-<p>
-Email: your-email@example.com
-</p>
+        // 居中的高亮蝶身与对称触角，保持正面轮廓清晰。
+        for (let index = 0; index < 48; index += 1) {
+          const bodyT = index / 47;
+          const bodyY = -31 + bodyT * 60;
+          const bodyWidth = 1.55 + Math.sin(bodyT * Math.PI) * 1.15;
+          pushParticle((seeded(index + 501) - .5) * bodyWidth, bodyY, 0, index * .21, 0, (seeded(index + 601) - .5) * 1.4, 0, 0);
+        }
+        for (let index = 0; index < 14; index += 1) {
+          pushParticle((seeded(index + 901) - .5) * 5, 27 + (seeded(index + 951) - .5) * 5, 0, index * .19, 0, (seeded(index + 981) - .5) * 1.2, 0, 0);
+        }
+        addCurve({ x: -2, y: 27 }, { x: -13, y: 39 }, { x: -26, y: 53 }, { x: -34, y: 49 }, 20, 0, 301, 0, 0, 0);
+        addCurve({ x: 2, y: 27 }, { x: 13, y: 39 }, { x: 26, y: 53 }, { x: 34, y: 49 }, 20, 0, 331, 0, 0, 0);
 
-</body>
+        // 翅膀从蝶身向外渐变：身体根部纯白，翅面中段电光青蓝，外缘霓虹粉紫。
+        const wingInner = new THREE.Color('#ffffff');
+        const wingMid = new THREE.Color('#00e5ff');
+        const wingOuter = new THREE.Color('#ff007f');
+        const mixWingColor = (outerProgress) => {
+          const color = new THREE.Color();
+          if (outerProgress < .52) {
+            color.copy(wingInner).lerp(wingMid, outerProgress / .52);
+          } else {
+            color.copy(wingMid).lerp(wingOuter, (outerProgress - .52) / .48);
+          }
+          return color;
+        };
+
+        butterflyParticles.forEach((particle) => {
+          if (!particle.side || !particle.wingType) return;
+          const rootX = 7;
+          const distanceFromRoot = Math.hypot(Math.abs(particle.x) - rootX, particle.y - particle.hingeY);
+          const wingSpan = particle.wingType === 1 ? 84 : 62;
+          const outerProgress = Math.min(1, Math.max(0, distanceFromRoot / wingSpan));
+          particle.color = mixWingColor(outerProgress);
+        });
+
+        const particleCount = butterflyParticles.length;
+        const butterflyGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+        const particlePhases = new Float32Array(particleCount);
+        const colorObjects = palette.map((color) => new THREE.Color(color));
+        butterflyParticles.forEach((particle, index) => {
+          positions[index * 3] = particle.x;
+          positions[index * 3 + 1] = particle.y;
+          positions[index * 3 + 2] = particle.z;
+          particlePhases[index] = particle.phase;
+          const color = particle.color || colorObjects[particle.colorIndex % colorObjects.length];
+          colors[index * 3] = color.r;
+          colors[index * 3 + 1] = color.g;
+          colors[index * 3 + 2] = color.b;
+        });
+        butterflyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        butterflyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        butterflyGeometry.setAttribute('aPhase', new THREE.BufferAttribute(particlePhases, 1));
+        const particleVertexShader = `
+          attribute float aPhase;
+          uniform float uTime;
+          uniform float uPointScale;
+          varying vec3 vColor;
+          varying float vFlicker;
+          void main() {
+            vColor = color;
+            vFlicker = 0.84 + 0.16 * (0.5 + 0.5 * sin(uTime * 0.006 + aPhase));
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = uPointScale * (0.9 + 0.1 * vFlicker);
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `;
+        // Canvas 生成的柔边光斑贴图：粒子中心亮、边缘透明，避免硬圆点。
+        const glowCanvas = document.createElement('canvas');
+        glowCanvas.width = 64;
+        glowCanvas.height = 64;
+        const glowContext = glowCanvas.getContext('2d');
+        const glowGradient = glowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
+        glowGradient.addColorStop(0, 'rgba(255,255,255,1)');
+        glowGradient.addColorStop(.2, 'rgba(255,255,255,.92)');
+        glowGradient.addColorStop(.54, 'rgba(255,255,255,.24)');
+        glowGradient.addColorStop(1, 'rgba(255,255,255,0)');
+        glowContext.fillStyle = glowGradient;
+        glowContext.fillRect(0, 0, 64, 64);
+        const glowTexture = new THREE.CanvasTexture(glowCanvas);
+        glowTexture.needsUpdate = true;
+        const particleFragmentShader = `
+          varying vec3 vColor;
+          varying float vFlicker;
+          uniform float uAlpha;
+          uniform sampler2D uSprite;
+          void main() {
+            vec4 sprite = texture2D(uSprite, gl_PointCoord);
+            if (sprite.a < 0.01) discard;
+            // 颜色只来自固定的 vertex color，闪烁只改变透明度，不做颜色插值。
+            gl_FragColor = vec4(vColor, sprite.a * uAlpha * vFlicker);
+          }
+        `;
+        const makeParticleMaterial = (pointScale, alpha) => new THREE.ShaderMaterial({
+          uniforms: { uTime: { value: 0 }, uPointScale: { value: pointScale }, uAlpha: { value: alpha }, uSprite: { value: glowTexture } },
+          vertexColors: true,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          vertexShader: particleVertexShader,
+          fragmentShader: particleFragmentShader,
+        });
+        const glowMaterial = makeParticleMaterial(7.5, .07);
+        const coreMaterial = makeParticleMaterial(1.8, .94);
+        const butterflyGlowPoints = new THREE.Points(butterflyGeometry, glowMaterial);
+        const butterflyCorePoints = new THREE.Points(butterflyGeometry, coreMaterial);
+        particleRenderGroup.add(butterflyGlowPoints, butterflyCorePoints);
+        bodyPoints.userData.role = 'bodyPoints';
+        leftWingGroup.userData.role = 'leftWingGroup';
+        rightWingGroup.userData.role = 'rightWingGroup';
+
+        const trail = Array.from({ length: trailLength }, (_, index) => ({ x: innerWidth * .5, y: innerHeight * .5, seed: index }));
+        const trailPool = Array.from({ length: trailPoolSize }, (_, index) => ({
+          x: 0, y: 0, z: -2, vx: 0, vy: 0, vz: 0, age: 9999, life: 1, size: 1,
+          seed: seeded(index + 700), colorIndex: index % palette.length,
+        }));
+        let poolCursor = 0;
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailPositions = new Float32Array(trailPoolSize * 3);
+        const trailColors = new Float32Array(trailPoolSize * 3);
+        const trailSizes = new Float32Array(trailPoolSize);
+        const trailAlphas = new Float32Array(trailPoolSize);
+        trailPositions.fill(99999);
+        trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+        trailGeometry.setAttribute('color', new THREE.BufferAttribute(trailColors, 3));
+        trailGeometry.setAttribute('aSize', new THREE.BufferAttribute(trailSizes, 1));
+        trailGeometry.setAttribute('aAlpha', new THREE.BufferAttribute(trailAlphas, 1));
+        // GLSL 将每个点绘制成柔边圆形，并读取对象池写入的尺寸 / 透明度。
+        const trailMaterial = new THREE.ShaderMaterial({
+          uniforms: { uSprite: { value: glowTexture } },
+          vertexColors: true,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          vertexShader: `
+            attribute float aSize;
+            attribute float aAlpha;
+            varying vec3 vColor;
+            varying float vAlpha;
+            void main() {
+              vColor = color;
+              vAlpha = aAlpha;
+              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+              gl_PointSize = aSize;
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          `,
+          fragmentShader: `
+            varying vec3 vColor;
+            varying float vAlpha;
+            uniform sampler2D uSprite;
+            void main() {
+              vec4 sprite = texture2D(uSprite, gl_PointCoord);
+              if (sprite.a < 0.01) discard;
+              gl_FragColor = vec4(vColor, sprite.a * vAlpha);
+            }
+          `,
+        });
+        scene.add(new THREE.Points(trailGeometry, trailMaterial));
+
+        const pointer = {
+          x: innerWidth * .5, y: innerHeight * .5,
+          easedX: innerWidth * .5, easedY: innerHeight * .5,
+          active: false, lastX: innerWidth * .5, lastY: innerHeight * .5,
+          rawVX: 0, rawVY: 0, lastInputAt: 0, lastFrameTime: performance.now(),
+          emissionAccumulator: 0, angle: 0,
+          // 水平鼠标位移控制蝴蝶根节点的双向转体：向右 0°，向左 180°。
+          currentRotationY: 0, targetRotationY: 0,
+          turnImpulse: 0, turnSign: 1,
+          // 发射器单独做阻尼；已生成的尾粒子不回写，因此掉头时保留旧惯性。
+          emitterVX: 0, emitterVY: 0,
+        };
+        const flightGuide = new THREE.Object3D();
+        const flightTarget = new THREE.Vector3();
+        scene.add(flightGuide);
+        // 屏幕坐标通过正交相机比例映射到 z=0 的 3D 平面。
+        const screenToWorld = (x, y) => ({ x: x - innerWidth / 2, y: innerHeight / 2 - y, z: 0 });
+        const resize = () => {
+          const width = innerWidth;
+          const height = innerHeight;
+          camera.left = -width / 2;
+          camera.right = width / 2;
+          camera.top = height / 2;
+          camera.bottom = -height / 2;
+          camera.updateProjectionMatrix();
+          renderer.setSize(width, height, false);
+        };
+        const move = (x, y) => {
+          const deltaX = x - pointer.x;
+          if (pointer.active) {
+            pointer.rawVX = deltaX;
+            pointer.rawVY = y - pointer.y;
+          }
+          if (Math.abs(deltaX) > 2) {
+            pointer.targetRotationY = deltaX > 0 ? 0 : Math.PI;
+            pointer.turnSign = deltaX > 0 ? 1 : -1;
+            pointer.turnImpulse = Math.min(1, .32 + Math.abs(deltaX) / 42);
+          }
+          pointer.x = x;
+          pointer.y = y;
+          pointer.active = true;
+          pointer.lastInputAt = performance.now();
+          canvas.classList.add('is-visible');
+        };
+        const emitTrailParticle = (originX, originY, directionX, directionY, energy, seedValue) => {
+          const particle = trailPool[poolCursor];
+          poolCursor = (poolCursor + 1) % trailPoolSize;
+          const spread = (seeded(seedValue + 1) - .5) * 1.7;
+          const directionAngle = Math.atan2(directionY, directionX) + spread;
+          const launchSpeed = .08 + seeded(seedValue + 2) * .28 + energy * .014;
+          const originSpread = 5 + energy * .12;
+          particle.x = originX + (seeded(seedValue + 3) - .5) * originSpread;
+          particle.y = originY + (seeded(seedValue + 4) - .5) * originSpread;
+          particle.z = -2 - seeded(seedValue + 5) * 3;
+           particle.vx = Math.cos(directionAngle) * launchSpeed - directionX * .012;
+           particle.vy = Math.sin(directionAngle) * launchSpeed - directionY * .012;
+           particle.vz = (seeded(seedValue + 10) - .5) * .05 - .018;
+          particle.age = 0;
+          particle.life = 360 + seeded(seedValue + 6) * 760;
+          particle.size = 1.3 + seeded(seedValue + 7) * 4.2 + energy * .025;
+          particle.seed = seeded(seedValue + 8) * 100;
+          // 尾迹出生时从青蓝 / 粉色开始，随后逐渐过渡到深紫消散。
+          particle.colorIndex = 1 + Math.floor(seeded(seedValue + 9) * 3);
+        };
+        const animate = (time) => {
+          const deltaTime = Math.min(40, Math.max(1, time - pointer.lastFrameTime));
+          pointer.lastFrameTime = time;
+          pointer.easedX += (pointer.x - pointer.easedX) * followEase;
+          pointer.easedY += (pointer.y - pointer.easedY) * followEase;
+          const velocityX = pointer.easedX - pointer.lastX;
+          const velocityY = pointer.easedY - pointer.lastY;
+          if (Math.hypot(velocityX, velocityY) > .05) pointer.angle += (Math.atan2(velocityY, velocityX) - pointer.angle) * .14;
+          pointer.lastX = pointer.easedX;
+          pointer.lastY = pointer.easedY;
+          pointer.emitterVX += (pointer.rawVX - pointer.emitterVX) * Math.min(1, deltaTime * .028);
+          pointer.emitterVY += (pointer.rawVY - pointer.emitterVY) * Math.min(1, deltaTime * .028);
+          const butterflyWorld = screenToWorld(pointer.easedX, pointer.easedY);
+          butterflyGroup.position.set(butterflyWorld.x, butterflyWorld.y, butterflyWorld.z);
+          // 用独立朝向引导节点调用 lookAt，保持粒子平面正对屏幕。
+          flightGuide.position.copy(butterflyGroup.position);
+          flightTarget.set(butterflyWorld.x + Math.cos(pointer.angle) * 100, butterflyWorld.y - Math.sin(pointer.angle) * 100, 0);
+          flightGuide.lookAt(flightTarget);
+          // Y 轴是左右双向转身，Z 轴在转身瞬间叠加 ±10° roll；两者都用阻尼，
+          // 不会在左右掉头时硬切。转向结束后 roll 自动回到飞行方向的轻微 banking。
+          pointer.currentRotationY += (pointer.targetRotationY - pointer.currentRotationY) * Math.min(1, deltaTime * .009);
+          pointer.turnImpulse *= Math.pow(.82, deltaTime / 16);
+          const flightBank = -pointer.angle * .12;
+          const turnRoll = pointer.turnSign * pointer.turnImpulse * (10 * Math.PI / 180);
+          butterflyGroup.rotation.y = pointer.currentRotationY;
+          butterflyGroup.rotation.z += (flightBank + turnRoll - butterflyGroup.rotation.z) * Math.min(1, deltaTime * .014);
+          // 将当前转体状态写入 canvas，方便本地调试与无障碍验收，不参与视觉渲染。
+          canvas.dataset.targetRotationY = pointer.targetRotationY.toFixed(3);
+          canvas.dataset.currentRotationY = pointer.currentRotationY.toFixed(3);
+          canvas.dataset.turnRoll = butterflyGroup.rotation.z.toFixed(3);
+          const inputEnergy = Math.min(42, Math.hypot(pointer.rawVX, pointer.rawVY));
+          const speed = Math.min(1, Math.hypot(pointer.x - pointer.easedX, pointer.y - pointer.easedY) / 100);
+          const isMoving = time - pointer.lastInputAt < 180;
+          pointer.rawVX *= Math.pow(.9, deltaTime / 16);
+          pointer.rawVY *= Math.pow(.9, deltaTime / 16);
+          if (isMoving) {
+            // 鼠标移动时持续从头部 / 翼尖发射，停止时已有粒子自然淡出。
+            pointer.emissionAccumulator += deltaTime * (.45 + inputEnergy * .12);
+            let emissionGuard = 0;
+            while (pointer.emissionAccumulator >= 1 && emissionGuard < 36) {
+              pointer.emissionAccumulator -= 1;
+              const wingSide = seeded(time + emissionGuard * 13.7) > .5 ? 1 : -1;
+              const wingTip = seeded(time + emissionGuard * 17.1) > .5;
+              const anchorX = pointer.easedX + wingSide * (wingTip ? 22 : 9);
+              const anchorY = pointer.easedY - (wingTip ? 22 : 5);
+              emitTrailParticle(anchorX, anchorY, pointer.emitterVX || pointer.rawVX || Math.cos(pointer.angle), pointer.emitterVY || pointer.rawVY || Math.sin(pointer.angle), inputEnergy, time + emissionGuard * 31);
+              emissionGuard += 1;
+            }
+          }
+          // 翅膀粒子围绕根部做 Y 轴开合，同时改变 Z 深度，形成 3D 拍翼。
+          // 使用完整构图比例，不再用上一版 .48 的缩小限制；速度只带来轻微尺度呼吸。
+          butterflyGroup.scale.setScalar(1 + speed * .12);
+          const positionAttribute = butterflyGeometry.getAttribute('position');
+          butterflyParticles.forEach((particle, index) => {
+            const flapWave = Math.sin(time * .001 * wingFlapSpeed + particle.phase * .035);
+            // 用较小的 3D 扇动角保留蝴蝶轮廓，并用平方缓动让拍翼在极值附近稍慢。
+            const easedFlap = Math.sign(flapWave) * Math.pow(Math.abs(flapWave), .82);
+            const flapAmplitude = particle.wingType === 1 ? 24 : 18;
+            // 左右翅膀使用相反的局部 Y 旋转，映射到镜像翅膀后会同步前后扇动。
+            const flapAngle = particle.side ? easedFlap * (flapAmplitude * Math.PI / 180) * particle.side : 0;
+            const flapCos = Math.cos(flapAngle);
+            const flapSin = Math.sin(flapAngle);
+            const hingeX = particle.side ? particle.side * 5 : 0;
+            const openScale = particle.side ? 1 - Math.abs(easedFlap) * .08 : 1;
+            const localX = particle.side ? hingeX + (particle.x - hingeX) * flapCos * openScale - particle.z * flapSin : particle.x;
+            const localZ = particle.side ? particle.x * flapSin + particle.z * flapCos : particle.z;
+            positionAttribute.array[index * 3] = localX;
+            positionAttribute.array[index * 3 + 1] = particle.y + Math.cos(time * .001 * wingFlapSpeed + particle.phase) * (particle.side ? .9 : .35);
+            positionAttribute.array[index * 3 + 2] = localZ;
+          });
+          positionAttribute.needsUpdate = true;
+          trail[0].x += (pointer.easedX - trail[0].x) * .34;
+          trail[0].y += (pointer.easedY - trail[0].y) * .34;
+          for (let index = 1; index < trail.length; index += 1) {
+            trail[index].x += (trail[index - 1].x - trail[index].x) * (.25 - index * .003);
+            trail[index].y += (trail[index - 1].y - trail[index].y) * (.25 - index * .003);
+          }
+          const trailPositionAttribute = trailGeometry.getAttribute('position');
+          const trailColorAttribute = trailGeometry.getAttribute('color');
+          const trailSizeAttribute = trailGeometry.getAttribute('aSize');
+          const trailAlphaAttribute = trailGeometry.getAttribute('aAlpha');
+          trailPool.forEach((particle, index) => {
+            const alive = particle.age < particle.life;
+            if (alive) {
+              particle.age += deltaTime;
+              // 低频正弦扰动模拟轻微湍流，随后用阻尼让粒子自然散开并停下。
+              particle.vx += Math.sin(time * .002 + particle.seed) * .0025 * deltaTime;
+              particle.vy += Math.cos(time * .0017 + particle.seed * 1.7) * .0025 * deltaTime;
+              particle.vz += Math.sin(time * .0013 + particle.seed * 1.3) * .00035 * deltaTime;
+              particle.x += particle.vx * deltaTime;
+              particle.y += particle.vy * deltaTime;
+              particle.z += particle.vz * deltaTime;
+              const damping = Math.pow(.994, deltaTime / 16);
+              particle.vx *= damping;
+              particle.vy *= damping;
+              particle.vz *= damping;
+            }
+            const progress = alive ? Math.min(1, particle.age / particle.life) : 1;
+            const fadeIn = alive ? Math.min(1, particle.age / 110) : 0;
+            const fadeOut = alive ? Math.pow(1 - progress, 1.55) : 0;
+            const fade = Math.min(fadeIn, fadeOut);
+            const startColor = colorObjects[particle.colorIndex % 4];
+            const endColor = colorObjects[4];
+            const colorMix = Math.min(1, progress * 1.15);
+            trailPositionAttribute.array[index * 3] = alive ? particle.x - innerWidth / 2 : 99999;
+            trailPositionAttribute.array[index * 3 + 1] = alive ? innerHeight / 2 - particle.y : 99999;
+            trailPositionAttribute.array[index * 3 + 2] = particle.z;
+            trailColorAttribute.array[index * 3] = startColor.r + (endColor.r - startColor.r) * colorMix;
+            trailColorAttribute.array[index * 3 + 1] = startColor.g + (endColor.g - startColor.g) * colorMix;
+            trailColorAttribute.array[index * 3 + 2] = startColor.b + (endColor.b - startColor.b) * colorMix;
+            trailSizeAttribute.array[index] = alive ? particle.size * (.25 + fade * .95) : 0;
+            trailAlphaAttribute.array[index] = fade;
+          });
+          trailPositionAttribute.needsUpdate = true;
+          trailColorAttribute.needsUpdate = true;
+          trailSizeAttribute.needsUpdate = true;
+          trailAlphaAttribute.needsUpdate = true;
+          glowMaterial.uniforms.uTime.value = time;
+          coreMaterial.uniforms.uTime.value = time;
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        };
+        resize();
+        canvas.dataset.renderer = 'three.js';
+        canvas.dataset.particleCount = String(particleCount);
+        canvas.dataset.trailPoolSize = String(trailPoolSize);
+        window.addEventListener('resize', resize);
+        window.__particleButterflyState = {
+          renderer: 'three.js', particleCount, trailPoolSize, trailLength, wingFlapSpeed,
+          wingFlapAmplitude: { upper: 24, lower: 18 }, followEase,
+          bidirectionalTurn: true, turnRollDegrees: 10, rendered: true,
+        };
+        requestAnimationFrame(animate);
+        return { move };
+      })();
+
+      function moveButterfly(x, y) {
+        particleButterfly.move(x, y);
+      }
+
+      const atlas = { columns: 18, rows: 7, frameCount: 120 };
+      const sourceVideoFrameCount = 302;
+      // 真实帧之间采用较慢的阻尼，避免从一个朝向跳到下一个朝向。
+      const frameEase = 0.13;
+      const sampledSourceFrames = [
+        0,3,5,8,10,13,15,18,20,23,25,28,30,33,35,38,40,43,46,48,51,53,56,58,61,63,66,68,71,
+        73,76,78,81,83,86,89,90,91,94,96,99,101,104,106,109,111,114,116,119,120,121,124,126,129,
+        132,134,137,139,142,144,147,149,150,152,154,157,159,162,164,167,169,172,175,177,180,182,
+        185,187,190,192,195,197,200,202,205,207,210,212,215,218,220,223,225,228,230,233,235,238,
+        240,243,245,248,250,253,255,258,261,263,266,268,270,271,273,276,278,281,283,286,288,301
+      ];
+
+      const angleKeys = [
+        // 由实际 contact sheet 的眼睛朝向逐项校准，不使用 angle / 360 * frames。
+        // 源视频顺序：右上 → 右 → 右下 → 下 → 左下 → 左 → 左上 → 上 → 右上。
+        { angle: 0, sourceFrame: 60, label: 'RIGHT' },
+        { angle: 45, sourceFrame: 75, label: 'LOWER RIGHT' },
+        { angle: 90, sourceFrame: 90, label: 'DOWN' },
+        { angle: 135, sourceFrame: 120, label: 'LOWER LEFT' },
+        { angle: 180, sourceFrame: 150, label: 'LEFT' },
+        { angle: 225, sourceFrame: 180, label: 'UPPER LEFT' },
+        { angle: 270, sourceFrame: 210, label: 'UP' },
+        // 右上实际采用 contact sheet 中帧 240 的抬眼右看姿态。
+        // 右侧垂直拖动仍明确经过 angle 0 的正右帧 60，避免被中间段吞掉。
+        { angle: 315, sourceFrame: 240, label: 'UPPER RIGHT' },
+      ];
+
+      function circularDistance(a, b) {
+        const difference = Math.abs(a - b) % 360;
+        return Math.min(difference, 360 - difference);
+      }
+      function nearestCalibratedKey(angle) {
+        return angleKeys.reduce((best, candidate) => (
+          circularDistance(angle, candidate.angle) < circularDistance(angle, best.angle) ? candidate : best
+        ));
+      }
+      function calibratedSourceFrame(angle) {
+        // 在相邻的人工校准锚点之间分段过渡，避免一个 45° 扇区内完全不响应。
+        // 这不是 angle / 360 * frames：每个区间的端点来自逐帧观察，区间跨度也不均匀。
+        const normalized = ((angle % 360) + 360) % 360;
+        const ordered = angleKeys.slice().sort((a, b) => a.angle - b.angle);
+        let lower = ordered[ordered.length - 1];
+        let upper = { ...ordered[0], angle: ordered[0].angle + 360, sourceFrame: ordered[0].sourceFrame + sourceVideoFrameCount };
+        for (let index = 0; index < ordered.length - 1; index += 1) {
+          if (normalized >= ordered[index].angle && normalized < ordered[index + 1].angle) {
+            lower = ordered[index];
+            upper = ordered[index + 1];
+            break;
+          }
+        }
+        if (normalized >= ordered[ordered.length - 1].angle) lower = ordered[ordered.length - 1];
+        const wrappedAngle = normalized < ordered[0].angle ? normalized + 360 : normalized;
+        const progress = Math.min(1, Math.max(0, (wrappedAngle - lower.angle) / (upper.angle - lower.angle)));
+        return lower.sourceFrame + (upper.sourceFrame - lower.sourceFrame) * progress;
+      }
+      function sourceFrameDistance(a, b) {
+        const difference = Math.abs(a - b) % sourceVideoFrameCount;
+        return Math.min(difference, sourceVideoFrameCount - difference);
+      }
+      function shortestSourceDelta(from, to) {
+        const half = sourceVideoFrameCount / 2;
+        return ((to - from + half) % sourceVideoFrameCount + sourceVideoFrameCount) % sourceVideoFrameCount - half;
+      }
+      function atlasFrameForSourceFrame(sourceFrame) {
+        const wrapped = ((sourceFrame % sourceVideoFrameCount) + sourceVideoFrameCount) % sourceVideoFrameCount;
+        return sampledSourceFrames.reduce((bestIndex, candidate, index) => (
+          sourceFrameDistance(wrapped, candidate) < sourceFrameDistance(wrapped, sampledSourceFrames[bestIndex]) ? index : bestIndex
+        ), 0);
+      }
+      function showFrame(atlasFrame) {
+        const frame = Math.round(((atlasFrame % atlas.frameCount) + atlas.frameCount) % atlas.frameCount);
+        const column = frame % atlas.columns;
+        const row = Math.floor(frame / atlas.columns);
+        cat.style.backgroundPosition = `${(column / (atlas.columns - 1)) * 100}% ${(row / (atlas.rows - 1)) * 100}%`;
+      }
+
+      let targetSourceFrame = 240;
+      let displayedSourceFrame = 240;
+      let animationFrameId = null;
+      let lastAngle = -45;
+      function easeDisplayedFrame() {
+        const delta = shortestSourceDelta(displayedSourceFrame, targetSourceFrame);
+        if (Math.abs(delta) < 0.35) {
+          displayedSourceFrame = targetSourceFrame;
+          showFrame(atlasFrameForSourceFrame(displayedSourceFrame));
+          animationFrameId = null;
+          return;
+        }
+        displayedSourceFrame += delta * frameEase;
+        showFrame(atlasFrameForSourceFrame(displayedSourceFrame));
+        animationFrameId = requestAnimationFrame(easeDisplayedFrame);
+      }
+      function setTargetFrame(sourceFrame) {
+        targetSourceFrame = sourceFrame;
+        if (animationFrameId === null) animationFrameId = requestAnimationFrame(easeDisplayedFrame);
+      }
+      function updateFromPointer(clientX, clientY) {
+        moveButterfly(clientX, clientY);
+        noiseBackground.setPointer(clientX, clientY);
+        // 以猫咪眼睛/头部中心为角度原点，而不是以浏览器视口中心为原点。
+        // 这样蝴蝶位于猫咪上方时，角度必然落在 UP / UPPER-* 区域。
+        const catBounds = cat.getBoundingClientRect();
+        const eyeAnchorX = catBounds.left + catBounds.width * .5;
+        const eyeAnchorY = catBounds.top + catBounds.height * .30;
+        const dx = clientX - eyeAnchorX;
+        const dy = clientY - eyeAnchorY;
+        const distance = Math.hypot(dx, dy);
+        const angle = distance < 1 ? lastAngle : Math.atan2(dy, dx) * 180 / Math.PI;
+        if (distance >= 1) lastAngle = angle;
+        const directionKey = nearestCalibratedKey(angle);
+        const sourceFrame = calibratedSourceFrame(angle);
+        window.__catDirectionState = {
+          angle: Math.round(angle * 10) / 10,
+          targetSourceFrame: Math.round(sourceFrame * 10) / 10,
+          targetLabel: directionKey.label,
+          anchor: { x: Math.round(eyeAnchorX), y: Math.round(eyeAnchorY) },
+        };
+        setTargetFrame(sourceFrame);
+      }
+      window.addEventListener('pointermove', (event) => updateFromPointer(event.clientX, event.clientY), { passive: true });
+      window.addEventListener('keydown', (event) => {
+        const keyboardAngles = { ArrowRight: 0, ArrowDown: 90, ArrowLeft: 180, ArrowUp: -90 };
+        if (event.key in keyboardAngles) setTargetFrame(calibratedSourceFrame(keyboardAngles[event.key]));
+        if (event.key === 'Escape') setTargetFrame(240);
+      });
+      window.__catDirectionCalibration = angleKeys.map(({ angle, sourceFrame, label }) => ({ angle, sourceFrame, label }));
+      showFrame(atlasFrameForSourceFrame(targetSourceFrame));
+    </script>
+    <script>
+      /*
+       * React UI：单文件静态页面中的轻量组件层。
+       * LetterSwap 可复用参数：text、direction（forward / ping-pong）、speed、charSpacing。
+       */
+      (() => {
+        const { createElement: h, useEffect, useRef, useState } = React;
+        const { createRoot } = ReactDOM;
+
+        function LetterSwap({
+          text,
+          direction = 'ping-pong',
+          speed = 520,
+          charSpacing = '0em',
+          className = '',
+          ariaLabel = text,
+        }) {
+          const [active, setActive] = useState(false);
+          const [cycle, setCycle] = useState(0);
+          const reverse = direction === 'ping-pong' && cycle % 2 === 1;
+          const chars = Array.from(text);
+          const escapeHtml = (value) => value.replace(/[&<>\"']/g, (match) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[match]));
+          const glyphMarkup = chars.map((char, index) => {
+            const safeChar = char === ' ' ? '&nbsp;' : escapeHtml(char);
+            const margin = index === chars.length - 1 ? 0 : charSpacing;
+            return `<span class="letter-swap-char" style="--swap-delay:${index * 42}ms;margin-right:${margin}"><span class="letter-swap-measure" aria-hidden="true">${safeChar}</span><span class="letter-swap-glyph current">${safeChar}</span><span class="letter-swap-glyph next" aria-hidden="true">${safeChar}</span></span>`;
+          }).join('');
+          return h('span', {
+            className: `letter-swap ui-interactive ${active ? 'is-active' : ''} ${reverse ? 'is-reverse' : ''} ${className}`,
+            style: { '--swap-duration': `${speed}ms`, '--char-spacing': charSpacing },
+            role: 'text',
+            'aria-label': ariaLabel,
+            onMouseEnter: () => { setCycle((value) => value + 1); setActive(true); },
+            onMouseLeave: () => setActive(false),
+            onFocus: () => { setCycle((value) => value + 1); setActive(true); },
+            onBlur: () => setActive(false),
+            dangerouslySetInnerHTML: { __html: glyphMarkup },
+          });
+        }
+
+        const projectItems = [
+          { index: '01', title: 'Personal CV', type: 'About me', anchor: 'personal-cv', description: { EN: 'A concise view of my background, interests, and the work that shapes my practice.', CN: '关于我的经历、兴趣，以及持续塑造个人实践方向的工作。' } },
+          { index: '02', title: 'Program', type: 'Projects', anchor: 'program', description: { EN: 'Selected interactive experiments, creative coding studies, and visual systems.', CN: '精选交互实验、创意编程研究与视觉系统。' }, projects: [{ name: 'allplay-demo', href: 'https://github.com/WangChaohong04/allplay-demo' }] },
+          { index: '03', title: 'Academic', type: 'Research', anchor: 'academic', description: { EN: 'Research notes across HCI, CSCW, and embodied interaction.', CN: '围绕 HCI、CSCW 与具身交互的研究记录。' } },
+          { index: '04', title: 'How to connect me', type: 'Contact', anchor: 'connect', description: { EN: 'For conversations, collaborations, and new ideas.', CN: '用于交流、合作与新想法的联系入口。' } },
+        ];
+
+        function butterflyInnerMarkup(index) {
+          // 以参考图的“蝶身 + 四翼 + S 形尾流”采样点组成小型粒子蝴蝶。
+          const orbitSeeded = (value) => {
+            const x = Math.sin(value * 12.9898 + 78.233) * 43758.5453;
+            return x - Math.floor(x);
+          };
+          const points = [];
+          const addPoint = (x, y, color, scale = 1, core = false, group = 'body') => points.push({ x, y, color, scale, core, group });
+          const addLine = (x1, y1, x2, y2, count, color, group = 'body') => {
+            for (let step = 0; step < count; step += 1) {
+              const t = step / Math.max(1, count - 1);
+              addPoint(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, color, .72 + orbitSeeded(index * 311 + step * 17) * .54, false, group);
+            }
+          };
+          const addCurve = (a, b, c, d, count, color, group = 'body') => {
+            for (let step = 0; step < count; step += 1) {
+              const t = step / Math.max(1, count - 1);
+              const inv = 1 - t;
+              const x = inv ** 3 * a[0] + 3 * inv ** 2 * t * b[0] + 3 * inv * t ** 2 * c[0] + t ** 3 * d[0];
+              const y = inv ** 3 * a[1] + 3 * inv ** 2 * t * b[1] + 3 * inv * t ** 2 * c[1] + t ** 3 * d[1];
+              addPoint(x, y, color, .64 + orbitSeeded(index * 211 + step * 7) * .58, false, group);
+            }
+          };
+          // 蝶身靠右，双翼向左上、左下展开，形成参考图的飞行姿态。
+          addLine(47, 25, 47, 42, 18, 'core');
+          addCurve([47, 25], [49, 17], [55, 10], [59, 9], 10, 'core');
+          addCurve([47, 26], [52, 19], [59, 17], [61, 18], 9, 'core');
+          addCurve([43, 28], [34, 20], [20, 8], [13, 11], 18, 'pink', 'upper');
+          addCurve([13, 11], [10, 17], [16, 22], [42, 31], 18, 'blue', 'upper');
+          addCurve([43, 31], [33, 34], [19, 41], [12, 47], 17, 'pink', 'lower');
+          addCurve([12, 47], [15, 53], [27, 49], [44, 35], 16, 'blue', 'lower');
+          for (let rib = 0; rib < 5; rib += 1) {
+            const y = 13 + rib * 4.6;
+            addCurve([44, 29], [35 - rib * 1.8, y + 2], [23 - rib * 1.2, y + 2], [15 + rib * .6, y], 9, rib % 2 ? 'blue' : 'pink', 'upper');
+          }
+          for (let rib = 0; rib < 4; rib += 1) {
+            const y = 42 + rib * 2.2;
+            addCurve([44, 34], [35 - rib * 2, y - 4], [23 - rib, y + 5], [15 + rib, 48], 8, rib % 2 ? 'blue' : 'pink', 'lower');
+          }
+          // 两股细长 S 形尾流，让环绕蝴蝶不再像静态四瓣图标。
+          addCurve([43, 34], [31, 39], [17, 54], [4, 48], 24, 'blue', 'trail');
+          addCurve([42, 37], [27, 48], [17, 62], [2, 59], 24, 'pink', 'trail');
+          for (let dust = 0; dust < 18; dust += 1) {
+            const t = orbitSeeded(index * 97 + dust * 13);
+            addPoint(4 - t * 14, 48 + Math.sin(t * Math.PI * 2) * 8 + (orbitSeeded(dust + 33) - .5) * 7, dust % 2 ? 'pink' : 'blue', .35 + orbitSeeded(dust + 51) * .48, false, 'trail');
+          }
+          const markupForGroup = (groupName) => points.filter((point) => point.group === groupName).map((point, particleIndex) => {
+            const color = point.color === 'core' ? '#ffffff' : point.color === 'pink' ? '#ff70d1' : '#5eeaff';
+            const size = point.core ? 2.2 : 1.1 + point.scale * .8;
+            const scatterX = Math.round((orbitSeeded(index * 1009 + particleIndex * 17) - .5) * 56);
+            const scatterY = Math.round((orbitSeeded(index * 1013 + particleIndex * 19) - .5) * 56);
+            const scatterRot = Math.round((orbitSeeded(index * 1019 + particleIndex * 23) - .5) * 180);
+            const dissolveDelay = (orbitSeeded(index * 1031 + particleIndex * 29) * .34).toFixed(2);
+            return `<i class="orbit-particle${point.core ? ' core' : ''}" aria-hidden="true" style="--particle-left:${(point.x / 64 * 100).toFixed(2)}%;--particle-top:${(point.y / 64 * 100).toFixed(2)}%;--particle-color:${color};--particle-size:${size.toFixed(2)}px;--particle-scale:${point.scale.toFixed(2)};--particle-opacity:${(point.core ? .98 : .58 + point.scale * .25).toFixed(2)};--scatter-x:${scatterX}px;--scatter-y:${scatterY}px;--scatter-rot:${scatterRot}deg;--particle-dissolve-delay:${dissolveDelay}s"></i>`;
+          }).join('');
+          return `<span class="orbit-particle-butterfly" aria-hidden="true"><span class="orbit-particle-group upper">${markupForGroup('upper')}</span><span class="orbit-particle-group lower">${markupForGroup('lower')}</span><span class="orbit-particle-group body">${markupForGroup('body')}</span><span class="orbit-particle-group trail">${markupForGroup('trail')}</span></span>`;
+        }
+
+        function ProjectWheel({ ready, onOpenProject }) {
+          const [activeIndex, setActiveIndex] = useState(0);
+          const particles = Array.from({ length: 30 }, (_, index) => {
+            const angle = index * 137.508 * Math.PI / 180;
+            const radiusX = 215 + (index % 5) * 54;
+            const radiusY = 86 + (index % 4) * 24;
+            const x = Math.round(Math.cos(angle) * radiusX);
+            const y = Math.round(Math.sin(angle) * radiusY);
+            const x2 = x + Math.round(Math.cos(angle + .8) * 18);
+            const y2 = y + Math.round(Math.sin(angle + .8) * 14);
+            const size = 2 + (index % 3);
+            const color = index % 3 === 0 ? '#9fdcff' : index % 3 === 1 ? '#d3a8ff' : '#ffb8df';
+            const delay = `${-(index % 9) * .42}s`;
+            const duration = `${3.6 + (index % 5) * .55}s`;
+            const opacity = (.32 + (index % 4) * .12).toFixed(2);
+            return `<i class="wheel-particle" aria-hidden="true" style="--particle-x:${x}px;--particle-y:${y}px;--particle-x2:${x2}px;--particle-y2:${y2}px;--particle-size:${size}px;--particle-color:${color};--particle-delay:${delay};--particle-duration:${duration};--particle-opacity:${opacity}"></i>`;
+          }).join('');
+          const cardPositions = {
+            '-3': { x: 'calc(-1 * min(46vw, 430px))', z: '-190px', rotate: '-24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
+            '-2': { x: 'calc(-1 * min(52vw, 560px))', z: '-105px', rotate: '-16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
+            '-1': { x: 'calc(-1 * min(35vw, 430px))', z: '-34px', rotate: '-8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
+            '0': { x: '0px', z: '24px', rotate: '0deg', scale: '1', opacity: '1', blur: '0px', depth: 6 },
+            '1': { x: 'min(35vw, 430px)', z: '-34px', rotate: '8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
+            '2': { x: 'min(52vw, 560px)', z: '-105px', rotate: '16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
+            '3': { x: 'min(60vw, 640px)', z: '-190px', rotate: '24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
+          };
+          const segments = projectItems.map((project, index) => {
+            let offset = (index - activeIndex + projectItems.length) % projectItems.length;
+            if (offset > projectItems.length / 2) offset -= projectItems.length;
+            const position = cardPositions[String(offset)];
+            return h('button', {
+              key: project.index,
+              className: `wheel-segment ${index === activeIndex ? 'is-active' : ''}`,
+              type: 'button',
+              'aria-label': project.title,
+              'data-index': index,
+              style: {
+                '--card-x': position.x,
+                '--card-z': position.z,
+                '--card-rotate': position.rotate,
+                '--card-scale': position.scale,
+                '--card-opacity': position.opacity,
+                '--card-blur': position.blur,
+                zIndex: position.depth,
+              },
+              onClick: () => {
+                setActiveIndex(index);
+                onOpenProject(index);
+              },
+            },
+              h('span', { className: 'wheel-segment-content' },
+                h('span', { className: 'wheel-segment-index' }, project.index),
+                h('span', { className: 'wheel-segment-title' }, project.title),
+                h('span', { className: 'wheel-segment-type' }, project.type),
+              ),
+            );
+          });
+          useEffect(() => {
+            const handleKeyDown = (event) => {
+              if (!ready || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+              event.preventDefault();
+              setActiveIndex((current) => {
+                const step = event.key === 'ArrowRight' ? 1 : -1;
+                return (current + step + projectItems.length) % projectItems.length;
+              });
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+            };
+          }, [ready]);
+          return h('div', {
+            className: 'project-orbit ui-interactive',
+            'aria-label': '项目转轮，可用左右方向键切换项目',
+          },
+            h('div', { className: 'wheel-ring' },
+              h('div', { className: 'wheel-particle-field', 'aria-hidden': 'true', dangerouslySetInnerHTML: { __html: particles } }),
+              segments,
+            ),
+            h('button', { className: 'wheel-nav wheel-nav-prev', type: 'button', 'aria-label': '上一个项目', onClick: () => setActiveIndex((current) => (current - 1 + projectItems.length) % projectItems.length) }, '←'),
+            h('button', { className: 'wheel-nav wheel-nav-next', type: 'button', 'aria-label': '下一个项目', onClick: () => setActiveIndex((current) => (current + 1) % projectItems.length) }, '→'),
+            h('div', { className: 'wheel-caption' }, `PROJECT ${projectItems[activeIndex].index} / USE ARROW KEYS`),
+          );
+        }
+
+        function PortfolioIntro() {
+          const [language, setLanguage] = useState('EN');
+          const [dismissed, setDismissed] = useState(false);
+          const [selectedIndex, setSelectedIndex] = useState(null);
+          useEffect(() => {
+            const timer = window.setTimeout(() => setDismissed(true), 3000);
+            return () => window.clearTimeout(timer);
+          }, []);
+          useEffect(() => {
+            const syncProjectFromLocation = () => {
+              const anchor = window.location.hash.slice(1);
+              const index = projectItems.findIndex((project) => project.anchor === anchor);
+              setSelectedIndex(index >= 0 ? index : null);
+            };
+            syncProjectFromLocation();
+            window.addEventListener('hashchange', syncProjectFromLocation);
+            window.addEventListener('popstate', syncProjectFromLocation);
+            return () => {
+              window.removeEventListener('hashchange', syncProjectFromLocation);
+              window.removeEventListener('popstate', syncProjectFromLocation);
+            };
+          }, []);
+          const openProject = (index) => {
+            const project = projectItems[index];
+            window.history.pushState(null, '', `#${project.anchor}`);
+            setSelectedIndex(index);
+          };
+          const closeProject = () => {
+            window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+            setSelectedIndex(null);
+          };
+          const selectedProject = selectedIndex == null ? null : projectItems[selectedIndex];
+          return h('section', { className: `ui-overlay ${dismissed ? 'is-awake' : ''}`, 'aria-label': '个人作品集首页' },
+            h('div', { className: `welcome-shell ${dismissed ? 'is-dismissed' : ''}` },
+              h('div', { className: 'welcome-lockup' },
+                h('h1', { className: 'welcome-title ui-interactive' }, h(LetterSwap, {
+                  text: language === 'EN' ? 'Welcome' : '欢迎', direction: 'ping-pong', speed: 560, charSpacing: '-.04em',
+                })),
+              ),
+            ),
+            h('div', { className: 'welcome-name ui-interactive' }, h(LetterSwap, {
+              text: 'Wang Chaohong', direction: 'forward', speed: 420, charSpacing: '.06em',
+            })),
+            h('button', {
+              className: `language-toggle language-panel ui-interactive ${language === '中' ? 'is-cn' : ''}`,
+              type: 'button',
+              'aria-label': '切换中文和英文',
+              'aria-pressed': language === '中',
+              'data-language': language,
+              onClick: () => setLanguage((value) => value === 'EN' ? '中' : 'EN'),
+            }, h(LetterSwap, { text: '中 / Eng', speed: 360, charSpacing: '.02em' })),
+            h(ProjectWheel, { ready: dismissed, onOpenProject: openProject }),
+            h('div', { className: `project-detail-layer ${selectedProject ? 'is-visible' : ''}`, 'aria-hidden': selectedProject ? 'false' : 'true' },
+              selectedProject && h('article', { className: 'project-detail-card', id: `project-${selectedProject.anchor}`, 'aria-label': selectedProject.title },
+                h('div', { className: 'project-detail-top' },
+                  h('span', { className: 'project-detail-kicker' }, `PROJECT / ${selectedProject.type}`),
+                  h('button', { className: 'project-detail-close ui-interactive', type: 'button', onClick: closeProject, 'aria-label': '返回项目转轮' }, 'Back to wheel ↗'),
+                ),
+                h('div', { className: 'project-detail-main' },
+                  h('p', { className: 'project-detail-index' }, selectedProject.index),
+                  h('h2', { className: 'project-detail-title' }, selectedProject.title),
+                  h('p', { className: 'project-detail-description' }, selectedProject.description[language]),
+                  selectedProject.projects && h('div', { className: 'project-project-list', 'aria-label': '项目列表' },
+                    selectedProject.projects.map((project) => h('a', { key: project.name, className: 'project-external-link', href: project.href, target: '_blank', rel: 'noreferrer' }, `${project.name} · GitHub ↗`)),
+                  ),
+                  selectedProject.anchor === 'connect' && h('div', { className: 'project-contact-list', 'aria-label': '个人联系方式' },
+                    h('div', { className: 'project-contact-row' },
+                      h('span', { className: 'project-contact-label' }, 'WeChat'),
+                      h('span', { className: 'project-contact-value' }, 'whynot_yourself'),
+                    ),
+                    h('div', { className: 'project-contact-row' },
+                      h('span', { className: 'project-contact-label' }, 'Email'),
+                      h('a', { className: 'project-contact-value', href: 'mailto:chaohongwang04@gmail.com' }, 'chaohongwang04@gmail.com'),
+                    ),
+                  ),
+                ),
+                h('div', { className: 'project-detail-footer' },
+                  h('span', null, language === '中' ? '点击返回转轮' : 'CLICK BACK TO RETURN'),
+                  h('span', null, `#${selectedProject.anchor}`),
+                ),
+              ),
+            ),
+          );
+        }
+
+        createRoot(document.getElementById('react-ui-root')).render(h(PortfolioIntro));
+        window.LetterSwap = LetterSwap;
+      })();
+    </script>
+  </body>
 </html>
+
