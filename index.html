@@ -292,24 +292,25 @@
       /* 大屏桌面：更舒展的上方转轮与下方角色区。 */
       @media (min-width: 721px) {
         .project-orbit {
-          top: 260px;
-          width: min(calc(100vw - 48px), 1380px);
-          height: 520px;
+          top: 220px;
+          width: min(calc(100vw - 48px), 1200px);
+          height: 450px;
         }
         .wheel-segment {
-          width: 500px;
-          height: 226px;
-          padding: 28px 30px;
-          border-radius: 30px;
+          width: 460px;
+          height: 208px;
+          padding: 26px 28px;
+          border-radius: 28px;
         }
-        .wheel-segment-title { max-width: 230px; font-size: 24px; }
+        .wheel-segment-title { max-width: 210px; font-size: 23px; }
         .cat-wrap {
-          bottom: 20px;
-          width: 520px;
-          height: 520px;
+          top: 42vh;
+          bottom: auto;
+          width: 540px;
+          height: 540px;
         }
-        #cat { max-width: 520px; }
-        .cat-ground-pool { bottom: 28px; width: 340px; }
+        #cat { max-width: 540px; }
+        .cat-ground-pool { top: calc(42vh + 500px); bottom: auto; width: 340px; }
         .wheel-caption { bottom: -4%; }
       }
       /* 笔记本：可视高度有限，转轮缩小并上移，猫固定留在下半区。 */
@@ -326,9 +327,9 @@
           border-radius: 24px;
         }
         .wheel-segment-title { max-width: 170px; font-size: 20px; }
-        .cat-wrap { width: 400px; height: 400px; }
+        .cat-wrap { top: auto; bottom: 20px; width: 400px; height: 400px; }
         #cat { max-width: 400px; }
-        .cat-ground-pool { width: 290px; }
+        .cat-ground-pool { top: auto; bottom: 28px; width: 290px; }
         .wheel-caption { bottom: -8%; }
       }
       .wheel-open-hit {
