@@ -264,8 +264,8 @@
         background: linear-gradient(145deg, rgba(214, 241, 255, .2), rgba(165, 135, 255, .11) 55%, rgba(255, 185, 231, .16));
         box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 0 34px rgba(113, 180, 255, .17);
         /* 较低的毛玻璃采样成本，视觉仍保留柔和折射。 */
-        backdrop-filter: blur(12px) saturate(115%);
-        -webkit-backdrop-filter: blur(12px) saturate(115%);
+        backdrop-filter: blur(6px) saturate(110%);
+        -webkit-backdrop-filter: blur(6px) saturate(110%);
         transform: translate(-50%, -50%) translateX(var(--card-x)) translateZ(var(--card-z)) translateY(var(--card-hover-y, 0px)) rotateX(var(--card-tilt-x, 0deg)) rotateY(calc(var(--card-rotate) + var(--card-tilt-y, 0deg))) scale(calc(var(--card-scale) * var(--card-interaction-scale, 1)));
         transform-style: preserve-3d;
         color: rgba(244, 250, 255, .84);
@@ -700,7 +700,7 @@
         }));
 
         // 星空本身一直存在于内存，但只有被鼠标轨迹“擦过”的星点才会显示。
-        for (let index = 0; index < 160; index += 1) {
+        for (let index = 0; index < 120; index += 1) {
           stars.push({
             x: seededRandom(),
             y: seededRandom(),
@@ -713,7 +713,7 @@
         }
 
         // 常驻环境星点：刻意避开中央猫和转轮区域，留给内容更干净的对比度。
-        const ambientStarCount = window.matchMedia('(max-width: 720px)').matches ? 16 : 34;
+        const ambientStarCount = window.matchMedia('(max-width: 720px)').matches ? 12 : 28;
         for (let index = 0; index < ambientStarCount; index += 1) {
           let x = .1;
           let y = .1;
@@ -780,8 +780,8 @@
               });
             }
           }
-          while (sparkles.length > 120) sparkles.shift();
-          while (trails.length > 32) trails.shift();
+          while (sparkles.length > 60) sparkles.shift();
+          while (trails.length > 16) trails.shift();
         }
 
         function drawGlow(x, y, radius, color, alpha) {
@@ -847,10 +847,10 @@
         function drawMeteors(now) {
           if (reducedMotion) return;
           // 用户指定持续流星节奏：每两秒一颗，始终只有一颗处于飞行中。
-          if (!nextMeteorAt) nextMeteorAt = now + 5000;
+          if (!nextMeteorAt) nextMeteorAt = now + 10000;
           if (now >= nextMeteorAt && !meteors.some((meteor) => now >= meteor.startAt && now < meteor.startAt + meteor.duration)) {
             spawnMeteor(now);
-            nextMeteorAt = now + 5000;
+            nextMeteorAt = now + 10000;
           }
           const live = meteors.filter((meteor) => now < meteor.startAt + meteor.duration);
           meteors.splice(0, meteors.length, ...live);
@@ -910,7 +910,7 @@
 
         function render(now) {
           const activeCanvasEffect = now - pointer.lastMovedAt < trailLifetime || trails.length > 0 || sparkles.length > 0;
-          const minimumFrameGap = activeCanvasEffect ? 1000 / 30 : 1000 / 18;
+          const minimumFrameGap = activeCanvasEffect ? 1000 / 24 : 1000 / 12;
           if (now - lastRenderAt < minimumFrameGap) {
             requestAnimationFrame(render);
             return;
@@ -1060,7 +1060,7 @@
         const trailLength = 30;
         // 尾迹使用循环对象池，避免鼠标移动时不断创建和销毁对象。
         // 保留长寿命与发射密度，但按设备降低未使用的粒子槽位。
-        const trailPoolSize = window.matchMedia('(max-width: 720px)').matches ? 280 : 420;
+        const trailPoolSize = window.matchMedia('(max-width: 720px)').matches ? 180 : 320;
         const wingFlapSpeed = 5.8;
         const followEase = 0.18;
         const seeded = (value) => {
@@ -1482,10 +1482,12 @@
           // 尾迹出生时从青蓝 / 粉色开始，随后逐渐过渡到深紫消散。
           particle.colorIndex = 1 + Math.floor(seeded(seedValue + 9) * 3);
         };
-        // 核显友好：WebGL 蝴蝶的几何更新上限为 30fps，避免持续占满集成显卡。
+        // 核显友好：移动时 24fps、闲置时 12fps，避免持续占满集成显卡。
         let lastThreeRenderAt = 0;
         const animate = (time) => {
-          if (time - lastThreeRenderAt < 1000 / 30) {
+          const isInputActive = time - pointer.lastInputAt < 360;
+          const renderInterval = isInputActive ? 1000 / 24 : 1000 / 12;
+          if (time - lastThreeRenderAt < renderInterval) {
             requestAnimationFrame(animate);
             return;
           }
@@ -1535,9 +1537,9 @@
           pointer.rawVY *= Math.pow(.9, deltaTime / 16);
           if (isMoving) {
             // 鼠标移动时持续从头部 / 翼尖发射，停止时已有粒子自然淡出。
-            pointer.emissionAccumulator += deltaTime * (.18 + inputEnergy * .045);
+            pointer.emissionAccumulator += deltaTime * (.12 + inputEnergy * .03);
             let emissionGuard = 0;
-            while (pointer.emissionAccumulator >= 1 && emissionGuard < 14) {
+            while (pointer.emissionAccumulator >= 1 && emissionGuard < 8) {
               pointer.emissionAccumulator -= 1;
               const wingSide = seeded(time + emissionGuard * 13.7) > .5 ? 1 : -1;
               const wingTip = seeded(time + emissionGuard * 17.1) > .5;
@@ -1919,6 +1921,8 @@
 
         function ProjectWheel({ ready, onOpenProject, language }) {
           const [activeIndex, setActiveIndex] = useState(0);
+          const pendingTiltRef = useRef(null);
+          const tiltRequestRef = useRef(null);
           const particles = Array.from({ length: 12 }, (_, index) => {
             const angle = index * 137.508 * Math.PI / 180;
             const radiusX = 215 + (index % 5) * 54;
@@ -1946,14 +1950,23 @@
             '3': { x: 'min(88vw, 1100px)', z: '-190px', rotate: '24deg', scale: '.46', opacity: '.16', blur: '1.4px', depth: 1 },
           };
           const tiltCard = (event) => {
-            const card = event.currentTarget;
-            const bounds = card.getBoundingClientRect();
-            const tiltY = ((event.clientX - (bounds.left + bounds.width / 2)) / (bounds.width / 2)) * 3;
-            const tiltX = -((event.clientY - (bounds.top + bounds.height / 2)) / (bounds.height / 2)) * 3;
-            card.style.setProperty('--card-tilt-x', `${tiltX.toFixed(2)}deg`);
-            card.style.setProperty('--card-tilt-y', `${tiltY.toFixed(2)}deg`);
+            pendingTiltRef.current = { card: event.currentTarget, x: event.clientX, y: event.clientY };
+            if (tiltRequestRef.current !== null) return;
+            tiltRequestRef.current = requestAnimationFrame(() => {
+              const pending = pendingTiltRef.current;
+              tiltRequestRef.current = null;
+              if (!pending?.card?.isConnected) return;
+              const bounds = pending.card.getBoundingClientRect();
+              const tiltY = ((pending.x - (bounds.left + bounds.width / 2)) / (bounds.width / 2)) * 3;
+              const tiltX = -((pending.y - (bounds.top + bounds.height / 2)) / (bounds.height / 2)) * 3;
+              pending.card.style.setProperty('--card-tilt-x', `${tiltX.toFixed(2)}deg`);
+              pending.card.style.setProperty('--card-tilt-y', `${tiltY.toFixed(2)}deg`);
+            });
           };
           const resetCardTilt = (event) => {
+            pendingTiltRef.current = null;
+            if (tiltRequestRef.current !== null) cancelAnimationFrame(tiltRequestRef.current);
+            tiltRequestRef.current = null;
             event.currentTarget.style.setProperty('--card-tilt-x', '0deg');
             event.currentTarget.style.setProperty('--card-tilt-y', '0deg');
           };
