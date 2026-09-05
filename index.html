@@ -496,6 +496,13 @@
       .project-detail-index { margin: 0 0 18px; color: rgba(157, 221, 255, .76); font-size: clamp(12px, 1.3vw, 16px); letter-spacing: .2em; }
       .project-detail-title { margin: 0; color: #f8fcff; font-size: clamp(48px, 9vw, 124px); font-weight: 780; font-style: italic; letter-spacing: -.08em; line-height: .84; text-transform: uppercase; text-shadow: 0 0 34px rgba(150, 219, 255, .22); }
       .project-detail-description { max-width: 540px; margin: clamp(28px, 5vw, 48px) 0 0; color: rgba(237, 246, 255, .72); font-size: clamp(14px, 1.35vw, 18px); line-height: 1.7; }
+      .project-detail-main.is-about { max-width: 780px; margin: clamp(28px, 5vh, 56px) 0; }
+      .project-detail-title.is-about { font-size: clamp(48px, 6.6vw, 78px); }
+      .project-about-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-height: min(35vh, 300px); margin-top: 26px; padding-right: 6px; overflow-y: auto; scrollbar-color: rgba(160, 218, 255, .5) transparent; }
+      .project-about-item { min-width: 0; padding: 13px 14px; border: 1px solid rgba(202, 231, 255, .18); border-radius: 14px; background: rgba(126, 152, 255, .07); }
+      .project-about-item.is-wide { grid-column: 1 / -1; }
+      .project-about-label { display: block; margin-bottom: 7px; color: rgba(157, 221, 255, .72); font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+      .project-about-value { display: block; color: rgba(242, 248, 255, .84); font-size: clamp(11px, 1vw, 13px); line-height: 1.55; }
       .project-project-list { display: grid; justify-items: start; }
       .project-external-link {
         display: inline-flex;
@@ -532,6 +539,8 @@
         .orbit-butterfly-5 { --rest-x: -110px; --rest-y: 136px; }
         .project-detail-card { min-height: min(520px, 78vh); }
         .project-detail-main { margin: 44px 0; }
+        .project-about-list { grid-template-columns: 1fr; max-height: min(34vh, 250px); }
+        .project-about-item.is-wide { grid-column: auto; }
         .project-detail-footer { flex-direction: column; }
       }
       .bottom-note {
@@ -1875,7 +1884,23 @@
         }
 
         const projectItems = [
-          { index: '01', title: { EN: 'About Me', CN: '关于我' }, type: { EN: 'About me', CN: '关于我' }, anchor: 'personal-cv', description: { EN: 'A concise view of my background, interests, and the work that shapes my practice.', CN: '关于我的经历、兴趣，以及持续塑造个人实践方向的工作。' } },
+          { index: '01', title: { EN: 'About Me', CN: '关于我' }, type: { EN: 'About me', CN: '关于我' }, anchor: 'personal-cv', description: { EN: 'A Computer Science student exploring Human-Centered AI, HCI, and interactive technology.', CN: '一名探索以人为中心的 AI、人机交互与交互技术的计算机科学学生。' }, about: { EN: [
+            { label: 'Education', value: 'Computer Science · Monash University Malaysia · February 2026 intake' },
+            { label: 'Current', value: 'Volunteer · Action Lab Malaysia' },
+            { label: 'HCI Focus', value: 'Human-Centered AI · Human-AI Interaction · Educational Technology · Multimodal Interaction · User-Centered Evaluation', wide: true },
+            { label: 'Programming', value: 'C++ · Python · HTML · SQL' },
+            { label: 'AI & Agents', value: 'LLM Applications · AI Agents · RAG · Prompt Engineering · Tool-Using Agents · Multi-Agent Evaluation · LLM Benchmarking', wide: true },
+            { label: 'AI Tools', value: 'DeepSeek Harness · Hermes · Codex · Qwen3.8 · Claude Code' },
+            { label: 'Hardware & Tools', value: 'ESP32 · Git · GitHub · Jupyter Notebook · VS Code' },
+          ], CN: [
+            { label: '教育经历', value: 'Monash University Malaysia · 计算机科学 · 2026 年 2 月入学' },
+            { label: '目前', value: 'Action Lab Malaysia · 志愿者' },
+            { label: 'HCI 方向', value: '以人为中心的 AI · 人机交互 · 教育技术 · 多模态交互 · 以用户为中心的评估', wide: true },
+            { label: '编程', value: 'C++ · Python · HTML · SQL' },
+            { label: 'AI 与智能体', value: 'LLM 应用 · AI Agents · RAG · Prompt Engineering · 工具调用型智能体 · 多智能体评估 · LLM Benchmarking', wide: true },
+            { label: 'AI 工具', value: 'DeepSeek Harness · Hermes · Codex · Qwen3.8 · Claude Code' },
+            { label: '硬件与工具', value: 'ESP32 · Git · GitHub · Jupyter Notebook · VS Code' },
+          ] } },
           { index: '02', title: { EN: 'Program', CN: '项目' }, type: { EN: 'Projects', CN: '项目作品' }, anchor: 'program', description: { EN: 'Selected interactive experiments, creative coding studies, and visual systems.', CN: '精选交互实验、创意编程研究与视觉系统。' }, projects: [{ name: 'allplay-demo', href: 'https://github.com/WangChaohong04/allplay-demo' }] },
           { index: '03', title: { EN: 'Publication', CN: '学术' }, type: { EN: 'Research', CN: '研究' }, anchor: 'academic', description: { EN: 'Research notes across HCI, CSCW, and embodied interaction.', CN: '围绕 HCI、CSCW 与具身交互的研究记录。' } },
           { index: '04', title: { EN: 'How to connect me', CN: '联系我' }, type: { EN: 'Contact', CN: '联系方式' }, anchor: 'connect', description: { EN: 'For conversations, collaborations, and new ideas.', CN: '用于交流、合作与新想法的联系入口。' } },
@@ -2137,10 +2162,16 @@
                   h('span', { className: 'project-detail-kicker' }, language === 'CN' ? `项目 / ${selectedProject.type[language]}` : `PROJECT / ${selectedProject.type[language]}`),
                   h('button', { className: 'project-detail-close ui-interactive', type: 'button', onClick: closeProject, 'aria-label': language === 'CN' ? '返回项目转轮' : 'Back to project wheel' }, language === 'CN' ? '返回转轮 ↗' : 'Back to wheel ↗'),
                 ),
-                h('div', { className: 'project-detail-main' },
+                h('div', { className: `project-detail-main ${selectedProject.about ? 'is-about' : ''}` },
                   h('p', { className: 'project-detail-index' }, selectedProject.index),
-                  h('h2', { className: 'project-detail-title' }, selectedProject.title[language]),
+                  h('h2', { className: `project-detail-title ${selectedProject.about ? 'is-about' : ''}` }, selectedProject.title[language]),
                   h('p', { className: 'project-detail-description' }, selectedProject.description[language]),
+                  selectedProject.about && h('div', { className: 'project-about-list', 'aria-label': language === 'CN' ? '个人经历与技术栈' : 'Background and technical stack' },
+                    selectedProject.about[language].map((item) => h('div', { key: item.label, className: `project-about-item ${item.wide ? 'is-wide' : ''}` },
+                      h('span', { className: 'project-about-label' }, item.label),
+                      h('span', { className: 'project-about-value' }, item.value),
+                    )),
+                  ),
                   selectedProject.projects && h('div', { className: 'project-project-list', 'aria-label': '项目列表' },
                     selectedProject.projects.map((project) => h('a', { key: project.name, className: 'project-external-link', href: project.href, target: '_blank', rel: 'noreferrer' }, `${project.name} · GitHub ↗`)),
                   ),
