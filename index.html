@@ -694,7 +694,8 @@
           ambientStars.push({
             x, y,
             radius: index % 9 === 0 ? 1.8 : .6 + seededRandom() * .6,
-            alpha: .08 + seededRandom() * .17,
+            // 仍在 0.08–0.25 的规范内，但抬高下限，静止画面也能读到星空层次。
+            alpha: .12 + seededRandom() * .13,
             color: colors[index % colors.length],
             twinkle: index % 5 === 0,
             phase: seededRandom() * Math.PI * 2,
@@ -772,7 +773,7 @@
           context.save();
           context.globalCompositeOperation = 'screen';
           context.filter = `blur(${Math.max(34, Math.min(width, height) * .055)}px)`;
-          // 三团非常淡的蓝紫星云，只做空间层次，不进入文字中心区。
+          // 三团极淡但可感知的蓝紫星云，只做空间层次，不进入文字中心区。
           const nebulae = [
             { x: .11, y: .18, radius: .4, color: '#1a5fff', period: 39000, phase: .2 },
             { x: .88, y: .23, radius: .37, color: '#6f3dff', period: 45000, phase: 1.8 },
@@ -780,12 +781,16 @@
           ];
           nebulae.forEach((nebula) => {
             const drift = Math.sin(now / nebula.period * Math.PI * 2 + nebula.phase);
-            drawGlow(width * nebula.x + drift * 28, height * nebula.y + Math.cos(now / nebula.period * Math.PI * 2 + nebula.phase) * 20, width * nebula.radius, nebula.color, .045);
+            drawGlow(width * nebula.x + drift * 28, height * nebula.y + Math.cos(now / nebula.period * Math.PI * 2 + nebula.phase) * 20, width * nebula.radius, nebula.color, .058);
           });
           context.filter = 'none';
           ambientStars.forEach((star) => {
             const pulse = reducedMotion || !star.twinkle ? 1 : .72 + .28 * Math.sin(now / star.duration * Math.PI * 2 + star.phase);
-            drawStar(star.x * width, star.y * height, star.radius, star.color, star.alpha * pulse);
+            const x = star.x * width;
+            const y = star.y * height;
+            drawStar(x, y, star.radius, star.color, star.alpha * pulse);
+            // 只有少数较大的星点拥有柔和外晕，避免画面重新变成噪点。
+            if (star.radius > 1.4) drawGlow(x, y, 10, star.color, star.alpha * .16 * pulse);
           });
           context.restore();
         }
