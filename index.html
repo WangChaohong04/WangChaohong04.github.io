@@ -52,7 +52,7 @@
         display: grid;
         place-items: center;
         padding: 10vh 8vw 20vh;
-        transition: opacity 900ms cubic-bezier(.22, 1, .36, 1), transform 900ms cubic-bezier(.22, 1, .36, 1);
+        transition: opacity 650ms cubic-bezier(.22, 1, .36, 1), transform 650ms cubic-bezier(.22, 1, .36, 1);
       }
       .welcome-shell.is-dismissed { opacity: 0; transform: translateY(-26px) scale(.985); }
       .welcome-lockup { position: relative; width: min(86vw, 850px); }
@@ -158,7 +158,7 @@
         transform: translate(-50%, -50%) scale(.9);
         opacity: 0;
         pointer-events: none;
-        transition: opacity 900ms ease, transform 1200ms cubic-bezier(.22, 1, .36, 1);
+        transition: opacity 650ms ease, transform 650ms cubic-bezier(.22, 1, .36, 1);
       }
       .ui-overlay.is-awake .project-orbit {
         opacity: 1;
@@ -235,7 +235,7 @@
         perspective: 1200px;
         transform-style: preserve-3d;
         pointer-events: none;
-        transition: opacity 750ms ease 260ms, transform 1050ms cubic-bezier(.22, 1, .36, 1) 260ms;
+        transition: opacity 650ms ease, transform 650ms cubic-bezier(.22, 1, .36, 1);
       }
       /* 横向转盘的环境光，不放置遮住猫咪的中心毛玻璃底板。 */
       .wheel-ring::before {
@@ -256,8 +256,8 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: clamp(300px, 36vw, 520px);
-        height: clamp(180px, 24vw, 290px);
+        width: clamp(292px, 36vw, 510px);
+        height: clamp(164px, 20vw, 250px);
         padding: clamp(22px, 2.8vw, 38px);
         border: 1px solid rgba(223, 240, 255, .52);
         border-radius: clamp(22px, 2.6vw, 34px);
@@ -265,18 +265,25 @@
         box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 0 34px rgba(113, 180, 255, .17);
         backdrop-filter: blur(17px) saturate(120%);
         -webkit-backdrop-filter: blur(17px) saturate(120%);
-        transform: translate(-50%, -50%) translateX(var(--card-x)) translateZ(var(--card-z)) rotateY(var(--card-rotate)) scale(var(--card-scale));
+        transform: translate(-50%, -50%) translateX(var(--card-x)) translateZ(var(--card-z)) translateY(var(--card-hover-y, 0px)) rotateX(var(--card-tilt-x, 0deg)) rotateY(calc(var(--card-rotate) + var(--card-tilt-y, 0deg))) scale(calc(var(--card-scale) * var(--card-interaction-scale, 1)));
         transform-style: preserve-3d;
         color: rgba(244, 250, 255, .84);
         opacity: var(--card-opacity);
         filter: blur(var(--card-blur));
         cursor: none;
         transform-origin: center;
-        transition: transform 900ms cubic-bezier(.22, 1, .36, 1), opacity 700ms ease, border-color 260ms ease, background 260ms ease, box-shadow 260ms ease, filter 700ms ease;
+        transition: transform 500ms cubic-bezier(.22, 1, .36, 1), opacity 500ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, filter 500ms ease;
         pointer-events: auto;
       }
-      .wheel-segment:hover,
-      .wheel-segment.is-active { border-color: rgba(213, 239, 255, .92); background: linear-gradient(145deg, rgba(216, 244, 255, .29), rgba(172, 148, 255, .16) 55%, rgba(255, 192, 232, .22)); box-shadow: inset 0 1px 0 rgba(255,255,255,.38), 0 0 34px rgba(130, 203, 255, .3); filter: brightness(1.15); }
+      .wheel-segment:hover { --card-hover-y: -4px; --card-interaction-scale: 1.015; border-color: rgba(213, 239, 255, .88); background: linear-gradient(145deg, rgba(216, 244, 255, .26), rgba(172, 148, 255, .15) 55%, rgba(255, 192, 232, .2)); box-shadow: inset 0 1px 0 rgba(255,255,255,.38), 0 0 34px rgba(130, 203, 255, .28); filter: brightness(1.1); }
+      .wheel-segment.is-active { border-color: rgba(213, 239, 255, .98); box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 0 30px rgba(112, 189, 255, .42), 0 0 56px rgba(181, 123, 255, .14); }
+      .wheel-segment:active { --card-hover-y: -1px; --card-interaction-scale: .985; transition-duration: 90ms; }
+      .wheel-segment:focus-visible,
+      .wheel-nav:focus-visible,
+      .project-detail-close:focus-visible,
+      .language-toggle:focus-visible,
+      .project-external-link:focus-visible,
+      .project-contact-value:focus-visible { outline: 2px solid rgba(171, 225, 255, .95); outline-offset: 4px; }
       .wheel-segment-content { display: flex; height: 100%; width: 100%; flex-direction: column; align-items: flex-start; justify-content: space-between; text-align: left; }
       .wheel-segment-index { font-size: 10px; letter-spacing: .2em; opacity: .62; }
       .wheel-segment-title { max-width: 230px; font-size: clamp(15px, 2vw, 26px); line-height: 1.05; letter-spacing: .06em; text-transform: uppercase; }
@@ -314,9 +321,9 @@
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 0 24px rgba(121, 190, 255, .16);
-        transition: opacity 500ms ease, background 220ms ease, border-color 220ms ease;
+        transition: opacity 500ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease;
       }
-      .wheel-nav:hover { border-color: rgba(220, 245, 255, .88); background: rgba(47, 70, 116, .46); }
+      .wheel-nav:hover { border-color: rgba(220, 245, 255, .88); background: rgba(47, 70, 116, .46); transform: translateY(-50%) scale(1.06); }
       .wheel-nav-prev { left: clamp(6px, 1.5vw, 22px); }
       .wheel-nav-next { right: clamp(6px, 1.5vw, 22px); }
       .ui-overlay.is-awake .wheel-nav { opacity: 1; pointer-events: auto; }
@@ -367,13 +374,13 @@
         pointer-events: none;
         backdrop-filter: blur(18px) saturate(120%);
         -webkit-backdrop-filter: blur(18px) saturate(120%);
-        transition: opacity 450ms ease, visibility 0s linear 450ms;
+        transition: opacity 240ms ease, visibility 0s linear 240ms;
       }
       .project-detail-layer.is-visible {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
-        transition-delay: 0s;
+        transition: opacity 380ms ease, visibility 0s linear 0s;
       }
       .project-detail-card {
         position: relative;
@@ -388,10 +395,11 @@
         border-radius: clamp(24px, 4vw, 42px);
         background: linear-gradient(140deg, rgba(20, 33, 50, .72), rgba(73, 43, 100, .34) 52%, rgba(11, 18, 35, .78));
         box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 24px 100px rgba(67, 125, 255, .2), 0 0 80px rgba(244, 109, 204, .1);
-        transform: translateY(24px) scale(.96);
-        transition: transform 650ms cubic-bezier(.22, 1, .36, 1);
+        transform: translateY(18px) scale(.965);
+        transform-origin: var(--detail-origin, 50% 50%);
+        transition: transform 240ms cubic-bezier(.22, 1, .36, 1);
       }
-      .project-detail-layer.is-visible .project-detail-card { transform: translateY(0) scale(1); }
+      .project-detail-layer.is-visible .project-detail-card { transform: translateY(0) scale(1); transition-duration: 380ms; }
       .project-detail-card::before,
       .project-detail-card::after {
         content: "";
@@ -469,7 +477,7 @@
       .project-detail-footer { display: flex; justify-content: space-between; gap: 18px; }
       @media (max-width: 720px) {
         .project-orbit { top: 31%; width: 100vw; height: min(70vw, 400px); }
-        .wheel-segment { width: clamp(190px, 45vw, 300px); height: clamp(118px, 28vw, 182px); padding: 18px 20px; }
+        .wheel-segment { width: clamp(190px, 45vw, 300px); height: clamp(108px, 24vw, 154px); padding: 16px 18px; }
         .wheel-nav { width: 42px; height: 42px; font-size: 20px; }
         .orbit-butterfly-0 { --rest-x: -190px; --rest-y: 0; }
         .orbit-butterfly-1 { --rest-x: -110px; --rest-y: -136px; }
@@ -550,15 +558,18 @@
         content: "";
         position: absolute;
         left: 50%;
-        bottom: -2%;
-        width: 58%;
-        height: 5%;
+        bottom: -1.5%;
+        width: clamp(280px, 32vw, 360px);
+        height: clamp(35px, 4vw, 55px);
         transform: translateX(-50%);
         border-radius: 50%;
-        background: rgba(88, 167, 255, 0.18);
-        filter: blur(28px);
+        background: radial-gradient(ellipse, rgba(89, 166, 255, .12), rgba(141, 94, 255, .08) 54%, transparent 74%);
+        filter: blur(32px);
+        opacity: .1;
+        animation: cat-pool-breathe 7s ease-in-out infinite;
         pointer-events: none;
       }
+      @keyframes cat-pool-breathe { 0%, 100% { opacity: .09; transform: translateX(-50%) scaleX(.96); } 50% { opacity: .105; transform: translateX(-50%) scaleX(1.03); } }
       #cat {
         width: 100%;
         max-width: 620px;
@@ -568,7 +579,10 @@
         background-size: 1800% 700%;
         background-position: 70.58823529411765% 0%;
         filter: drop-shadow(0 20px 30px rgba(35, 118, 255, 0.24));
+        transform-origin: 50% 100%;
+        animation: cat-breathe 5s ease-in-out infinite;
       }
+      @keyframes cat-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.008); } }
       /* Three.js 粒子蝴蝶：全屏画布不拦截转盘、按钮和猫咪的交互。 */
       #particle-butterfly {
         position: fixed;
@@ -582,12 +596,20 @@
         transition: opacity 180ms ease;
       }
       #particle-butterfly.is-visible { opacity: 1; }
+      #cursor-dot, #cursor-ring { position: fixed; z-index: 60; top: 0; left: 0; pointer-events: none; border-radius: 50%; transform: translate(-50%, -50%); will-change: transform, opacity; }
+      #cursor-dot { width: 4px; height: 4px; background: rgba(250, 253, 255, .9); box-shadow: 0 0 8px rgba(170, 224, 255, .8); }
+      #cursor-ring { width: 24px; height: 24px; border: 1px solid rgba(209, 239, 255, .72); opacity: 0; transition: width 160ms ease, height 160ms ease, opacity 160ms ease, border-color 160ms ease; }
+      #cursor-ring.is-target { opacity: .92; border-color: rgba(203, 161, 255, .88); }
       @media (max-width: 720px) {
         .cat-wrap { width: min(92vw, 520px); height: min(72dvh, 540px); }
       }
       @media (prefers-reduced-motion: reduce) {
-        #noise-background { display: none; }
+        body, .wheel-segment, .wheel-nav, .project-detail-card, .letter-swap, .project-detail-close, .project-external-link, .project-contact-value, .language-toggle { cursor: auto; }
+        #noise-background { opacity: .45; }
         #particle-butterfly { display: none; }
+        #cursor-dot, #cursor-ring { display: none; }
+        #cat, .cat-wrap::after, .wheel-particle, .orbit-particle, .orbit-particle-group { animation: none !important; }
+        .welcome-shell, .project-orbit, .wheel-ring, .wheel-segment, .project-detail-layer, .project-detail-card { transition-duration: 1ms !important; }
       }
     </style>
   </head>
@@ -599,6 +621,8 @@
         <div id="cat" role="img" aria-label="会根据鼠标方向转头的水晶猫咪"></div>
       </div>
       <canvas id="particle-butterfly" aria-hidden="true"></canvas>
+      <div id="cursor-dot" aria-hidden="true"></div>
+      <div id="cursor-ring" aria-hidden="true"></div>
     </main>
 
     <script>
@@ -611,7 +635,7 @@
         colors = ['#ff9ecf', '#c5a6ff', '#a7f3d0', '#9edbff'],
         speed = 0.00034,
         disturbance = 0.34,
-        trailLifetime = 2000,
+        trailLifetime = 2800,
       } = {}) {
         const canvas = document.getElementById(canvasId);
         const context = canvas.getContext('2d', { alpha: false });
@@ -620,6 +644,11 @@
         const trails = [];
         const sparkles = [];
         const stars = [];
+        const ambientStars = [];
+        const meteors = [];
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let nextMeteorAt = 0;
+        let lastIdleMeteorGroupAt = -Infinity;
         let width = 0;
         let height = 0;
         let devicePixelRatio = 1;
@@ -652,6 +681,27 @@
           });
         }
 
+        // 常驻环境星点：刻意避开中央猫和转轮区域，留给内容更干净的对比度。
+        const ambientStarCount = window.matchMedia('(max-width: 720px)').matches ? 20 : 46;
+        for (let index = 0; index < ambientStarCount; index += 1) {
+          let x = .1;
+          let y = .1;
+          for (let attempt = 0; attempt < 24; attempt += 1) {
+            x = seededRandom();
+            y = seededRandom();
+            if (x < .18 || x > .82 || y < .16 || y > .82 || (x < .3 || x > .7)) break;
+          }
+          ambientStars.push({
+            x, y,
+            radius: index % 9 === 0 ? 1.8 : .6 + seededRandom() * .6,
+            alpha: .08 + seededRandom() * .17,
+            color: colors[index % colors.length],
+            twinkle: index % 5 === 0,
+            phase: seededRandom() * Math.PI * 2,
+            duration: 4000 + seededRandom() * 5000,
+          });
+        }
+
         function resize() {
           devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
           width = window.innerWidth;
@@ -673,7 +723,7 @@
           pointer.active = true;
           pointer.lastMovedAt = performance.now();
           const previous = trails[trails.length - 1];
-          if (!previous || Math.hypot(x - previous.x, y - previous.y) > 8) {
+          if (!previous || Math.hypot(x - previous.x, y - previous.y) > 18) {
             trails.push({ x, y, createdAt: pointer.lastMovedAt, seed: Math.random() * 50 });
           }
           stars.forEach((star) => {
@@ -695,7 +745,7 @@
             });
           }
           while (sparkles.length > 220) sparkles.shift();
-          while (trails.length > 80) trails.shift();
+          while (trails.length > 40) trails.shift();
         }
 
         function drawGlow(x, y, radius, color, alpha) {
@@ -716,6 +766,82 @@
           context.arc(x, y, radius, 0, Math.PI * 2);
           context.fill();
           context.globalAlpha = 1;
+        }
+
+        function drawAmbientSky(now) {
+          context.save();
+          context.globalCompositeOperation = 'screen';
+          context.filter = `blur(${Math.max(34, Math.min(width, height) * .055)}px)`;
+          // 三团非常淡的蓝紫星云，只做空间层次，不进入文字中心区。
+          const nebulae = [
+            { x: .11, y: .18, radius: .4, color: '#1a5fff', period: 39000, phase: .2 },
+            { x: .88, y: .23, radius: .37, color: '#6f3dff', period: 45000, phase: 1.8 },
+            { x: .76, y: .86, radius: .35, color: '#235dff', period: 34000, phase: 3.4 },
+          ];
+          nebulae.forEach((nebula) => {
+            const drift = Math.sin(now / nebula.period * Math.PI * 2 + nebula.phase);
+            drawGlow(width * nebula.x + drift * 28, height * nebula.y + Math.cos(now / nebula.period * Math.PI * 2 + nebula.phase) * 20, width * nebula.radius, nebula.color, .045);
+          });
+          context.filter = 'none';
+          ambientStars.forEach((star) => {
+            const pulse = reducedMotion || !star.twinkle ? 1 : .72 + .28 * Math.sin(now / star.duration * Math.PI * 2 + star.phase);
+            drawStar(star.x * width, star.y * height, star.radius, star.color, star.alpha * pulse);
+          });
+          context.restore();
+        }
+
+        function spawnMeteor(now, small = false, delay = 0) {
+          const fromLeft = seededRandom() > .42;
+          const length = small ? 82 + seededRandom() * 48 : 100 + seededRandom() * 80;
+          meteors.push({
+            startAt: now + delay,
+            duration: (small ? 700 : 900) + seededRandom() * (small ? 240 : 500),
+            x: fromLeft ? width * (.02 + seededRandom() * .22) : width * (.72 + seededRandom() * .18),
+            y: height * (.04 + seededRandom() * .18),
+            length,
+            angle: (25 + seededRandom() * 15) * Math.PI / 180,
+            alpha: small ? .3 : .35 + seededRandom() * .15,
+          });
+        }
+
+        function drawMeteors(now) {
+          if (reducedMotion) return;
+          const idleFor = now - pointer.lastMovedAt;
+          if (!nextMeteorAt) nextMeteorAt = now + 14000 + seededRandom() * 10000;
+          if (now >= nextMeteorAt && !meteors.some((meteor) => now >= meteor.startAt && now < meteor.startAt + meteor.duration)) {
+            spawnMeteor(now);
+            nextMeteorAt = now + 14000 + seededRandom() * 10000;
+          }
+          if (pointer.active && idleFor > 15000 && now - lastIdleMeteorGroupAt > 30000 && meteors.length === 0) {
+            const count = 2 + Math.floor(seededRandom() * 2);
+            for (let index = 0; index < count; index += 1) spawnMeteor(now, true, index * (400 + seededRandom() * 300));
+            lastIdleMeteorGroupAt = now;
+          }
+          const live = meteors.filter((meteor) => now < meteor.startAt + meteor.duration);
+          meteors.splice(0, meteors.length, ...live);
+          context.save();
+          context.globalCompositeOperation = 'screen';
+          live.forEach((meteor) => {
+            const progress = Math.max(0, Math.min(1, (now - meteor.startAt) / meteor.duration));
+            if (!progress) return;
+            const distance = Math.min(width, height) * .22 * progress;
+            const x = meteor.x + Math.cos(meteor.angle) * distance;
+            const y = meteor.y + Math.sin(meteor.angle) * distance;
+            const tailX = x - Math.cos(meteor.angle) * meteor.length;
+            const tailY = y - Math.sin(meteor.angle) * meteor.length;
+            const fade = Math.sin(progress * Math.PI) * meteor.alpha;
+            const gradient = context.createLinearGradient(tailX, tailY, x, y);
+            gradient.addColorStop(0, 'rgba(119, 162, 255, 0)');
+            gradient.addColorStop(.72, `rgba(158, 202, 255, ${fade * .44})`);
+            gradient.addColorStop(1, `rgba(246, 251, 255, ${fade})`);
+            context.strokeStyle = gradient;
+            context.lineWidth = meteor.length < 100 ? 1 : 1.5;
+            context.beginPath();
+            context.moveTo(tailX, tailY);
+            context.lineTo(x, y);
+            context.stroke();
+          });
+          context.restore();
         }
 
         // Galaxy 旋涡：沿鼠标经过的每个采样点生成短暂的梵高式弧线，
@@ -751,20 +877,17 @@
           pointer.easedX += (pointer.x - pointer.easedX) * 0.085;
           pointer.easedY += (pointer.y - pointer.easedY) * 0.085;
           context.clearRect(0, 0, width, height);
-          // 页面基底保持纯黑，只有鼠标轨迹上的流体、星点与光晕被逐步唤醒。
+          // 黑色基底上保留极淡星云与常驻星点；互动层仍只由鼠标唤醒。
           context.fillStyle = '#000';
           context.fillRect(0, 0, width, height);
+          drawAmbientSky(now);
+          drawMeteors(now);
 
           const recentActivity = Math.max(0, 1 - (now - pointer.lastMovedAt) / trailLifetime);
           const liveTrails = trails.filter((trail) => now - trail.createdAt < trailLifetime);
           trails.splice(0, trails.length, ...liveTrails);
           const liveSparkles = sparkles.filter((sparkle) => now - sparkle.createdAt < trailLifetime);
           sparkles.splice(0, sparkles.length, ...liveSparkles);
-          if (recentActivity <= 0 && liveTrails.length === 0 && liveSparkles.length === 0) {
-            requestAnimationFrame(render);
-            return;
-          }
-
           context.save();
           context.globalCompositeOperation = 'screen';
           context.filter = `blur(${Math.max(18, Math.min(width, height) * 0.035)}px)`;
@@ -803,8 +926,8 @@
             const life = Math.max(0, 1 - age / trailLifetime);
             const color = colors[index % colors.length];
             const wobble = simplex.noise2D(trail.seed, now * speed * 1.6) * 14 * disturbance;
-            const radius = (24 + (index % 4) * 8) * (0.65 + life * 0.7);
-            drawGlow(trail.x + wobble, trail.y - wobble * 0.45, radius, color, 0.42 * life);
+            const radius = (72 + (index % 4) * 16) * (0.65 + life * 0.7);
+            drawGlow(trail.x + wobble, trail.y - wobble * 0.45, radius, color, 0.20 * life);
             drawGalaxySwirl(trail, now, index);
           });
           liveSparkles.forEach((sparkle) => {
@@ -875,11 +998,11 @@
       }
 
       const noiseBackground = NoiseBackground({
-        // Galaxy / Van Gogh 星空调色：纯黑底，只有鼠标触碰路径唤醒紫蓝星尘。
+        // Galaxy / Van Gogh 星空调色：黑底常驻低密度星空，鼠标额外唤醒紫蓝星尘。
         colors: ['#4c28ff', '#1977ff', '#9b62ff', '#62eaff', '#ef6dff'],
         speed: 0.00042,
         disturbance: 0.42,
-        trailLifetime: 2000,
+        trailLifetime: 2800,
       });
 
       const cat = document.querySelector('#cat');
@@ -1172,7 +1295,8 @@
           vertexShader: particleVertexShader,
           fragmentShader: particleFragmentShader,
         });
-        const glowMaterial = makeParticleMaterial(7.5, .07);
+        // 外层只扩大低透明光雾，核心仍由独立材质保持清晰。
+        const glowMaterial = makeParticleMaterial(12, .10);
         const coreMaterial = makeParticleMaterial(1.8, .94);
         const butterflyGlowPoints = new THREE.Points(butterflyGeometry, glowMaterial);
         const butterflyCorePoints = new THREE.Points(butterflyGeometry, coreMaterial);
@@ -1241,6 +1365,7 @@
           turnImpulse: 0, turnSign: 1,
           // 发射器单独做阻尼；已生成的尾粒子不回写，因此掉头时保留旧惯性。
           emitterVX: 0, emitterVY: 0,
+          idleBlend: 0,
         };
         const flightGuide = new THREE.Object3D();
         const flightTarget = new THREE.Vector3();
@@ -1288,7 +1413,7 @@
            particle.vy = Math.sin(directionAngle) * launchSpeed - directionY * .012;
            particle.vz = (seeded(seedValue + 10) - .5) * .05 - .018;
           particle.age = 0;
-          particle.life = 360 + seeded(seedValue + 6) * 760;
+          particle.life = 550 + seeded(seedValue + 6) * 850;
           particle.size = 1.3 + seeded(seedValue + 7) * 4.2 + energy * .025;
           particle.seed = seeded(seedValue + 8) * 100;
           // 尾迹出生时从青蓝 / 粉色开始，随后逐渐过渡到深紫消散。
@@ -1297,8 +1422,16 @@
         const animate = (time) => {
           const deltaTime = Math.min(40, Math.max(1, time - pointer.lastFrameTime));
           pointer.lastFrameTime = time;
-          pointer.easedX += (pointer.x - pointer.easedX) * followEase;
-          pointer.easedY += (pointer.y - pointer.easedY) * followEase;
+          const idle = pointer.active && time - pointer.lastInputAt > 10000;
+          pointer.idleBlend += ((idle ? 1 : 0) - pointer.idleBlend) * Math.min(1, deltaTime * .006);
+          // 闲置时轻轻靠近猫肩，不覆盖猫脸；再次移动鼠标后 300–500ms 内回到指针。
+          const catBounds = cat.getBoundingClientRect();
+          const shoulderX = catBounds.left + catBounds.width * .72;
+          const shoulderY = catBounds.top + catBounds.height * .28 + Math.sin(time * .0021) * 4;
+          const targetX = pointer.x + (shoulderX - pointer.x) * pointer.idleBlend;
+          const targetY = pointer.y + (shoulderY - pointer.y) * pointer.idleBlend;
+          pointer.easedX += (targetX - pointer.easedX) * followEase;
+          pointer.easedY += (targetY - pointer.easedY) * followEase;
           const velocityX = pointer.easedX - pointer.lastX;
           const velocityY = pointer.easedY - pointer.lastY;
           if (Math.hypot(velocityX, velocityY) > .05) pointer.angle += (Math.atan2(velocityY, velocityX) - pointer.angle) * .14;
@@ -1324,6 +1457,7 @@
           canvas.dataset.targetRotationY = pointer.targetRotationY.toFixed(3);
           canvas.dataset.currentRotationY = pointer.currentRotationY.toFixed(3);
           canvas.dataset.turnRoll = butterflyGroup.rotation.z.toFixed(3);
+          canvas.dataset.idle = String(idle);
           const inputEnergy = Math.min(42, Math.hypot(pointer.rawVX, pointer.rawVY));
           const speed = Math.min(1, Math.hypot(pointer.x - pointer.easedX, pointer.y - pointer.easedY) / 100);
           const isMoving = time - pointer.lastInputAt < 180;
@@ -1411,6 +1545,7 @@
           trailColorAttribute.needsUpdate = true;
           trailSizeAttribute.needsUpdate = true;
           trailAlphaAttribute.needsUpdate = true;
+          glowMaterial.uniforms.uAlpha.value += ((idle ? .04 : .10) - glowMaterial.uniforms.uAlpha.value) * Math.min(1, deltaTime * .008);
           glowMaterial.uniforms.uTime.value = time;
           coreMaterial.uniforms.uTime.value = time;
           renderer.render(scene, camera);
@@ -1554,6 +1689,25 @@
         setTargetFrame(sourceFrame);
       }
       window.addEventListener('pointermove', (event) => updateFromPointer(event.clientX, event.clientY), { passive: true });
+      // 视觉鼠标始终跟随真实指针；交互元素才显示细环，不干扰系统可访问性。
+      (() => {
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion || !dot || !ring) return;
+        const setCursor = (x, y) => {
+          dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+          ring.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+        };
+        const isTarget = (element) => element?.closest?.('button, a, [role="button"], input, select, textarea');
+        window.addEventListener('pointermove', (event) => setCursor(event.clientX, event.clientY), { passive: true });
+        document.addEventListener('pointerover', (event) => ring.classList.toggle('is-target', Boolean(isTarget(event.target))));
+        document.addEventListener('pointerout', (event) => {
+          if (!isTarget(event.relatedTarget)) ring.classList.remove('is-target');
+        });
+        document.addEventListener('focusin', (event) => ring.classList.toggle('is-target', Boolean(isTarget(event.target))));
+        document.addEventListener('focusout', () => ring.classList.remove('is-target'));
+      })();
       window.addEventListener('keydown', (event) => {
         const keyboardAngles = { ArrowRight: 0, ArrowDown: 90, ArrowLeft: 180, ArrowUp: -90 };
         if (event.key in keyboardAngles) setTargetFrame(calibratedSourceFrame(keyboardAngles[event.key]));
@@ -1695,6 +1849,18 @@
             '2': { x: 'min(76vw, 900px)', z: '-135px', rotate: '16deg', scale: '.56', opacity: '.38', blur: '.8px', depth: 2 },
             '3': { x: 'min(88vw, 1100px)', z: '-190px', rotate: '24deg', scale: '.46', opacity: '.16', blur: '1.4px', depth: 1 },
           };
+          const tiltCard = (event) => {
+            const card = event.currentTarget;
+            const bounds = card.getBoundingClientRect();
+            const tiltY = ((event.clientX - (bounds.left + bounds.width / 2)) / (bounds.width / 2)) * 3;
+            const tiltX = -((event.clientY - (bounds.top + bounds.height / 2)) / (bounds.height / 2)) * 3;
+            card.style.setProperty('--card-tilt-x', `${tiltX.toFixed(2)}deg`);
+            card.style.setProperty('--card-tilt-y', `${tiltY.toFixed(2)}deg`);
+          };
+          const resetCardTilt = (event) => {
+            event.currentTarget.style.setProperty('--card-tilt-x', '0deg');
+            event.currentTarget.style.setProperty('--card-tilt-y', '0deg');
+          };
           const segments = projectItems.map((project, index) => {
             let offset = (index - activeIndex + projectItems.length) % projectItems.length;
             if (offset > projectItems.length / 2) offset -= projectItems.length;
@@ -1714,10 +1880,13 @@
                 '--card-blur': position.blur,
                 zIndex: position.depth,
               },
-              onClick: () => {
+              onClick: (event) => {
                 setActiveIndex(index);
-                onOpenProject(index);
+                onOpenProject(index, event.currentTarget);
               },
+              onPointerMove: tiltCard,
+              onPointerLeave: resetCardTilt,
+              onBlur: resetCardTilt,
             },
               h('span', { className: 'wheel-segment-content' },
                 h('span', { className: 'wheel-segment-index' }, project.index),
@@ -1758,9 +1927,18 @@
           const [language, setLanguage] = useState('EN');
           const [dismissed, setDismissed] = useState(false);
           const [selectedIndex, setSelectedIndex] = useState(null);
+          const [detailOrigin, setDetailOrigin] = useState('50% 50%');
+          const lastTriggerRef = useRef(null);
           useEffect(() => {
-            const timer = window.setTimeout(() => setDismissed(true), 3000);
-            return () => window.clearTimeout(timer);
+            const dismiss = () => setDismissed(true);
+            const timer = window.setTimeout(dismiss, 1200);
+            window.addEventListener('pointerdown', dismiss, { once: true, passive: true });
+            window.addEventListener('keydown', dismiss, { once: true });
+            return () => {
+              window.clearTimeout(timer);
+              window.removeEventListener('pointerdown', dismiss);
+              window.removeEventListener('keydown', dismiss);
+            };
           }, []);
           useEffect(() => {
             const syncProjectFromLocation = () => {
@@ -1776,15 +1954,33 @@
               window.removeEventListener('popstate', syncProjectFromLocation);
             };
           }, []);
-          const openProject = (index) => {
+          const openProject = (index, trigger) => {
             const project = projectItems[index];
+            if (trigger) {
+              const bounds = trigger.getBoundingClientRect();
+              const originX = ((bounds.left + bounds.width / 2) / window.innerWidth * 100).toFixed(1);
+              const originY = ((bounds.top + bounds.height / 2) / window.innerHeight * 100).toFixed(1);
+              setDetailOrigin(`${originX}% ${originY}%`);
+              lastTriggerRef.current = trigger;
+            }
             window.history.pushState(null, '', `#${project.anchor}`);
             setSelectedIndex(index);
           };
           const closeProject = () => {
             window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
             setSelectedIndex(null);
+            window.setTimeout(() => lastTriggerRef.current?.focus(), 260);
           };
+          useEffect(() => {
+            const onKeyDown = (event) => {
+              if (event.key === 'Escape' && selectedIndex != null) {
+                event.preventDefault();
+                closeProject();
+              }
+            };
+            window.addEventListener('keydown', onKeyDown);
+            return () => window.removeEventListener('keydown', onKeyDown);
+          }, [selectedIndex]);
           const selectedProject = selectedIndex == null ? null : projectItems[selectedIndex];
           return h('section', { className: `ui-overlay ${dismissed ? 'is-awake' : ''}`, 'aria-label': '个人作品集首页' },
             h('div', { className: `welcome-shell ${dismissed ? 'is-dismissed' : ''}` },
@@ -1807,7 +2003,7 @@
             }, h(LetterSwap, { text: '中 / Eng', speed: 360, charSpacing: '.02em' })),
             h(ProjectWheel, { ready: dismissed, onOpenProject: openProject }),
             h('div', { className: `project-detail-layer ${selectedProject ? 'is-visible' : ''}`, 'aria-hidden': selectedProject ? 'false' : 'true' },
-              selectedProject && h('article', { className: 'project-detail-card', id: `project-${selectedProject.anchor}`, 'aria-label': selectedProject.title },
+              selectedProject && h('article', { className: 'project-detail-card', id: `project-${selectedProject.anchor}`, 'aria-label': selectedProject.title, style: { '--detail-origin': detailOrigin } },
                 h('div', { className: 'project-detail-top' },
                   h('span', { className: 'project-detail-kicker' }, `PROJECT / ${selectedProject.type}`),
                   h('button', { className: 'project-detail-close ui-interactive', type: 'button', onClick: closeProject, 'aria-label': '返回项目转轮' }, 'Back to wheel ↗'),
