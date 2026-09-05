@@ -554,22 +554,24 @@
         transform: translateX(-50%);
         pointer-events: none;
       }
-      .cat-wrap::after {
-        content: "";
-        position: absolute;
+      /* 独立于猫的容器：以前的伪元素会随容器底部落到视口外，导致光池不可见。 */
+      .cat-ground-pool {
+        position: fixed;
+        z-index: 1;
         left: 50%;
-        bottom: -1.5%;
+        bottom: clamp(5px, 1.3vh, 14px);
         width: clamp(280px, 32vw, 360px);
         height: clamp(35px, 4vw, 55px);
         transform: translateX(-50%);
         border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(89, 166, 255, .12), rgba(141, 94, 255, .08) 54%, transparent 74%);
-        filter: blur(32px);
-        opacity: .1;
+        /* 透明度只由元素自身 .095–.11 控制，不能再与颜色 alpha 相乘而消失。 */
+        background: radial-gradient(ellipse, rgba(91, 172, 255, .98) 0%, rgba(130, 102, 255, .82) 47%, rgba(48, 26, 116, 0) 76%);
+        filter: blur(30px);
+        opacity: .11;
         animation: cat-pool-breathe 7s ease-in-out infinite;
         pointer-events: none;
       }
-      @keyframes cat-pool-breathe { 0%, 100% { opacity: .09; transform: translateX(-50%) scaleX(.96); } 50% { opacity: .105; transform: translateX(-50%) scaleX(1.03); } }
+      @keyframes cat-pool-breathe { 0%, 100% { opacity: .095; transform: translateX(-50%) scaleX(.96); } 50% { opacity: .11; transform: translateX(-50%) scaleX(1.03); } }
       #cat {
         width: 100%;
         max-width: 620px;
@@ -608,7 +610,7 @@
         #noise-background { opacity: .45; }
         #particle-butterfly { display: none; }
         #cursor-dot, #cursor-ring { display: none; }
-        #cat, .cat-wrap::after, .wheel-particle, .orbit-particle, .orbit-particle-group { animation: none !important; }
+        #cat, .cat-ground-pool, .wheel-particle, .orbit-particle, .orbit-particle-group { animation: none !important; }
         .welcome-shell, .project-orbit, .wheel-ring, .wheel-segment, .project-detail-layer, .project-detail-card { transition-duration: 1ms !important; }
       }
     </style>
@@ -617,6 +619,7 @@
     <main class="stage" aria-label="鼠标方向控制的水晶猫咪">
       <canvas id="noise-background" aria-hidden="true"></canvas>
       <div id="react-ui-root"></div>
+      <div class="cat-ground-pool" aria-hidden="true"></div>
       <div class="cat-wrap">
         <div id="cat" role="img" aria-label="会根据鼠标方向转头的水晶猫咪"></div>
       </div>
@@ -648,6 +651,7 @@
         const meteors = [];
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let nextMeteorAt = 0;
+        let hasShownIntroMeteor = false;
         let lastIdleMeteorGroupAt = -Infinity;
         let width = 0;
         let height = 0;
@@ -693,7 +697,7 @@
           }
           ambientStars.push({
             x, y,
-            radius: index % 9 === 0 ? 1.8 : .6 + seededRandom() * .6,
+            radius: index % 9 === 0 ? 1.8 : .8 + seededRandom() * .4,
             // 仍在 0.08–0.25 的规范内，但抬高下限，静止画面也能读到星空层次。
             alpha: .12 + seededRandom() * .13,
             color: colors[index % colors.length],
@@ -789,8 +793,8 @@
             const x = star.x * width;
             const y = star.y * height;
             drawStar(x, y, star.radius, star.color, star.alpha * pulse);
-            // 只有少数较大的星点拥有柔和外晕，避免画面重新变成噪点。
-            if (star.radius > 1.4) drawGlow(x, y, 10, star.color, star.alpha * .16 * pulse);
+            // 所有常驻星点都有极轻微外晕；大星更亮，但仍保持稀疏而非噪点。
+            drawGlow(x, y, star.radius > 1.4 ? 12 : 5, star.color, star.alpha * (star.radius > 1.4 ? .19 : .075) * pulse);
           });
           context.restore();
         }
@@ -812,6 +816,11 @@
         function drawMeteors(now) {
           if (reducedMotion) return;
           const idleFor = now - pointer.lastMovedAt;
+          // 首屏在 Welcome 消退后给出一颗可见的提示性流星；后续仍严格保持低频随机。
+          if (!hasShownIntroMeteor && now > 4200) {
+            spawnMeteor(now);
+            hasShownIntroMeteor = true;
+          }
           if (!nextMeteorAt) nextMeteorAt = now + 14000 + seededRandom() * 10000;
           if (now >= nextMeteorAt && !meteors.some((meteor) => now >= meteor.startAt && now < meteor.startAt + meteor.duration)) {
             spawnMeteor(now);
