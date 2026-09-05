@@ -289,6 +289,29 @@
       .wheel-segment-index { font-size: 10px; letter-spacing: .2em; opacity: .62; }
       .wheel-segment-title { max-width: 230px; font-size: clamp(15px, 2vw, 26px); line-height: 1.05; letter-spacing: .06em; text-transform: uppercase; }
       .wheel-segment-type { font-size: 9px; letter-spacing: .14em; opacity: .58; text-transform: uppercase; }
+      /* 笔记本浏览器的可视高度通常低于全屏显示器：转轮与猫拆分为上下两个稳定区域。 */
+      @media (min-width: 721px) and (max-height: 980px) {
+        .project-orbit {
+          top: 22%;
+          width: min(100vw, 1120px);
+          height: min(48vw, 450px);
+        }
+        .wheel-segment {
+          width: clamp(252px, 29vw, 430px);
+          height: clamp(140px, 15vw, 204px);
+          padding: clamp(18px, 2vw, 28px);
+          border-radius: clamp(20px, 2vw, 28px);
+        }
+        .wheel-segment-title { max-width: 190px; font-size: clamp(15px, 1.7vw, 22px); }
+        .cat-wrap {
+          bottom: 18px;
+          width: min(42vw, 500px);
+          height: min(58dvh, 560px);
+        }
+        #cat { max-width: 500px; }
+        .cat-ground-pool { bottom: 25px; }
+        .wheel-caption { bottom: -4%; }
+      }
       .wheel-open-hit {
         position: absolute;
         top: 50%;
