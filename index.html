@@ -503,6 +503,8 @@
       .project-about-item.is-wide { grid-column: 1 / -1; }
       .project-about-label { display: block; margin-bottom: 7px; color: rgba(157, 221, 255, .72); font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
       .project-about-value { display: block; color: rgba(242, 248, 255, .84); font-size: clamp(11px, 1vw, 13px); line-height: 1.55; }
+      .project-about-link { display: inline-flex; align-items: center; min-height: 28px; margin-top: 10px; padding: 0 10px; border: 1px solid rgba(136, 219, 255, .38); border-radius: 999px; color: rgba(192, 237, 255, .96); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-decoration: none; transition: transform 160ms ease, background 160ms ease, border-color 160ms ease; }
+      .project-about-link:hover, .project-about-link:focus-visible { border-color: rgba(221, 154, 255, .8); background: rgba(157, 96, 255, .16); outline: none; transform: translateY(-1px); }
       .project-project-list { display: grid; justify-items: start; }
       .project-external-link {
         display: inline-flex;
@@ -1892,6 +1894,8 @@
             { label: 'AI & Agents', value: 'LLM Applications · AI Agents · RAG · Prompt Engineering · Tool-Using Agents · Multi-Agent Evaluation · LLM Benchmarking', wide: true },
             { label: 'AI Tools', value: 'DeepSeek Harness · Hermes · Codex · Qwen3.8 · Claude Code' },
             { label: 'Hardware & Tools', value: 'ESP32 · Git · GitHub · Jupyter Notebook · VS Code' },
+            { label: 'Certification', value: 'Google Data Analytics Professional Certificate' },
+            { label: 'Yale Certificate', value: 'Introduction to Psychology · Yale University (Coursera)', href: 'https://coursera.org/verify/W6G93XKSWUPE', linkLabel: 'Verify credential ↗', wide: true },
           ], CN: [
             { label: '教育经历', value: 'Monash University Malaysia · 计算机科学 · 2026 年 2 月入学' },
             { label: '目前', value: 'Action Lab Malaysia · 志愿者' },
@@ -1900,6 +1904,8 @@
             { label: 'AI 与智能体', value: 'LLM 应用 · AI Agents · RAG · Prompt Engineering · 工具调用型智能体 · 多智能体评估 · LLM Benchmarking', wide: true },
             { label: 'AI 工具', value: 'DeepSeek Harness · Hermes · Codex · Qwen3.8 · Claude Code' },
             { label: '硬件与工具', value: 'ESP32 · Git · GitHub · Jupyter Notebook · VS Code' },
+            { label: '证书', value: 'Google 数据分析专业证书' },
+            { label: 'Yale 证书', value: '心理学导论 · Yale University（Coursera）', href: 'https://coursera.org/verify/W6G93XKSWUPE', linkLabel: '验证证书 ↗', wide: true },
           ] } },
           { index: '02', title: { EN: 'Program', CN: '项目' }, type: { EN: 'Projects', CN: '项目作品' }, anchor: 'program', description: { EN: 'Selected interactive experiments, creative coding studies, and visual systems.', CN: '精选交互实验、创意编程研究与视觉系统。' }, projects: [{ name: 'allplay-demo', href: 'https://github.com/WangChaohong04/allplay-demo' }] },
           { index: '03', title: { EN: 'Publication', CN: '学术' }, type: { EN: 'Research', CN: '研究' }, anchor: 'academic', description: { EN: 'Research notes across HCI, CSCW, and embodied interaction.', CN: '围绕 HCI、CSCW 与具身交互的研究记录。' } },
@@ -2170,6 +2176,7 @@
                     selectedProject.about[language].map((item) => h('div', { key: item.label, className: `project-about-item ${item.wide ? 'is-wide' : ''}` },
                       h('span', { className: 'project-about-label' }, item.label),
                       h('span', { className: 'project-about-value' }, item.value),
+                      item.href && h('a', { className: 'project-about-link', href: item.href, target: '_blank', rel: 'noreferrer' }, item.linkLabel),
                     )),
                   ),
                   selectedProject.projects && h('div', { className: 'project-project-list', 'aria-label': '项目列表' },
