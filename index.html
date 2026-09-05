@@ -1762,10 +1762,10 @@
         }
 
         const projectItems = [
-          { index: '01', title: 'Personal CV', type: 'About me', anchor: 'personal-cv', description: { EN: 'A concise view of my background, interests, and the work that shapes my practice.', CN: '关于我的经历、兴趣，以及持续塑造个人实践方向的工作。' } },
-          { index: '02', title: 'Program', type: 'Projects', anchor: 'program', description: { EN: 'Selected interactive experiments, creative coding studies, and visual systems.', CN: '精选交互实验、创意编程研究与视觉系统。' }, projects: [{ name: 'allplay-demo', href: 'https://github.com/WangChaohong04/allplay-demo' }] },
-          { index: '03', title: 'Academic', type: 'Research', anchor: 'academic', description: { EN: 'Research notes across HCI, CSCW, and embodied interaction.', CN: '围绕 HCI、CSCW 与具身交互的研究记录。' } },
-          { index: '04', title: 'How to connect me', type: 'Contact', anchor: 'connect', description: { EN: 'For conversations, collaborations, and new ideas.', CN: '用于交流、合作与新想法的联系入口。' } },
+          { index: '01', title: { EN: 'Personal CV', CN: '个人简历' }, type: { EN: 'About me', CN: '关于我' }, anchor: 'personal-cv', description: { EN: 'A concise view of my background, interests, and the work that shapes my practice.', CN: '关于我的经历、兴趣，以及持续塑造个人实践方向的工作。' } },
+          { index: '02', title: { EN: 'Program', CN: '项目' }, type: { EN: 'Projects', CN: '项目作品' }, anchor: 'program', description: { EN: 'Selected interactive experiments, creative coding studies, and visual systems.', CN: '精选交互实验、创意编程研究与视觉系统。' }, projects: [{ name: 'allplay-demo', href: 'https://github.com/WangChaohong04/allplay-demo' }] },
+          { index: '03', title: { EN: 'Academic', CN: '学术' }, type: { EN: 'Research', CN: '研究' }, anchor: 'academic', description: { EN: 'Research notes across HCI, CSCW, and embodied interaction.', CN: '围绕 HCI、CSCW 与具身交互的研究记录。' } },
+          { index: '04', title: { EN: 'How to connect me', CN: '联系我' }, type: { EN: 'Contact', CN: '联系方式' }, anchor: 'connect', description: { EN: 'For conversations, collaborations, and new ideas.', CN: '用于交流、合作与新想法的联系入口。' } },
         ];
 
         function butterflyInnerMarkup(index) {
@@ -1826,7 +1826,7 @@
           return `<span class="orbit-particle-butterfly" aria-hidden="true"><span class="orbit-particle-group upper">${markupForGroup('upper')}</span><span class="orbit-particle-group lower">${markupForGroup('lower')}</span><span class="orbit-particle-group body">${markupForGroup('body')}</span><span class="orbit-particle-group trail">${markupForGroup('trail')}</span></span>`;
         }
 
-        function ProjectWheel({ ready, onOpenProject }) {
+        function ProjectWheel({ ready, onOpenProject, language }) {
           const [activeIndex, setActiveIndex] = useState(0);
           const particles = Array.from({ length: 30 }, (_, index) => {
             const angle = index * 137.508 * Math.PI / 180;
@@ -1874,7 +1874,7 @@
               key: project.index,
               className: `wheel-segment ${index === activeIndex ? 'is-active' : ''}`,
               type: 'button',
-              'aria-label': project.title,
+              'aria-label': project.title[language],
               'data-index': index,
               style: {
                 '--card-x': position.x,
@@ -1895,8 +1895,8 @@
             },
               h('span', { className: 'wheel-segment-content' },
                 h('span', { className: 'wheel-segment-index' }, project.index),
-                h('span', { className: 'wheel-segment-title' }, project.title),
-                h('span', { className: 'wheel-segment-type' }, project.type),
+                h('span', { className: 'wheel-segment-title' }, project.title[language]),
+                h('span', { className: 'wheel-segment-type' }, project.type[language]),
               ),
             );
           });
@@ -1916,15 +1916,15 @@
           }, [ready]);
           return h('div', {
             className: 'project-orbit ui-interactive',
-            'aria-label': '项目转轮，可用左右方向键切换项目',
+            'aria-label': language === 'CN' ? '项目转轮，可用左右方向键切换项目' : 'Project wheel. Use left and right arrow keys to switch projects.',
           },
             h('div', { className: 'wheel-ring' },
               h('div', { className: 'wheel-particle-field', 'aria-hidden': 'true', dangerouslySetInnerHTML: { __html: particles } }),
               segments,
             ),
-            h('button', { className: 'wheel-nav wheel-nav-prev', type: 'button', 'aria-label': '上一个项目', onClick: () => setActiveIndex((current) => (current - 1 + projectItems.length) % projectItems.length) }, '←'),
-            h('button', { className: 'wheel-nav wheel-nav-next', type: 'button', 'aria-label': '下一个项目', onClick: () => setActiveIndex((current) => (current + 1) % projectItems.length) }, '→'),
-            h('div', { className: 'wheel-caption' }, `PROJECT ${projectItems[activeIndex].index} / USE ARROW KEYS`),
+            h('button', { className: 'wheel-nav wheel-nav-prev', type: 'button', 'aria-label': language === 'CN' ? '上一个项目' : 'Previous project', onClick: () => setActiveIndex((current) => (current - 1 + projectItems.length) % projectItems.length) }, '←'),
+            h('button', { className: 'wheel-nav wheel-nav-next', type: 'button', 'aria-label': language === 'CN' ? '下一个项目' : 'Next project', onClick: () => setActiveIndex((current) => (current + 1) % projectItems.length) }, '→'),
+            h('div', { className: 'wheel-caption' }, language === 'CN' ? `项目 ${projectItems[activeIndex].index} / 可使用左右方向键` : `PROJECT ${projectItems[activeIndex].index} / USE ARROW KEYS`),
           );
         }
 
@@ -1987,7 +1987,7 @@
             return () => window.removeEventListener('keydown', onKeyDown);
           }, [selectedIndex]);
           const selectedProject = selectedIndex == null ? null : projectItems[selectedIndex];
-          return h('section', { className: `ui-overlay ${dismissed ? 'is-awake' : ''}`, 'aria-label': '个人作品集首页' },
+          return h('section', { className: `ui-overlay ${dismissed ? 'is-awake' : ''}`, 'aria-label': language === 'CN' ? '个人作品集首页' : 'Personal portfolio homepage' },
             h('div', { className: `welcome-shell ${dismissed ? 'is-dismissed' : ''}` },
               h('div', { className: 'welcome-lockup' },
                 h('h1', { className: 'welcome-title ui-interactive' }, h(LetterSwap, {
@@ -1999,40 +1999,40 @@
               text: 'Wang Chaohong', direction: 'forward', speed: 420, charSpacing: '.06em',
             })),
             h('button', {
-              className: `language-toggle language-panel ui-interactive ${language === '中' ? 'is-cn' : ''}`,
+              className: `language-toggle language-panel ui-interactive ${language === 'CN' ? 'is-cn' : ''}`,
               type: 'button',
-              'aria-label': '切换中文和英文',
-              'aria-pressed': language === '中',
+              'aria-label': language === 'CN' ? '切换为英文' : 'Switch to Chinese',
+              'aria-pressed': language === 'CN',
               'data-language': language,
-              onClick: () => setLanguage((value) => value === 'EN' ? '中' : 'EN'),
-            }, h(LetterSwap, { text: '中 / Eng', speed: 360, charSpacing: '.02em' })),
-            h(ProjectWheel, { ready: dismissed, onOpenProject: openProject }),
+              onClick: () => setLanguage((value) => value === 'EN' ? 'CN' : 'EN'),
+            }, h(LetterSwap, { text: language === 'EN' ? 'EN / 中' : '中 / EN', speed: 360, charSpacing: '.02em' })),
+            h(ProjectWheel, { ready: dismissed, onOpenProject: openProject, language }),
             h('div', { className: `project-detail-layer ${selectedProject ? 'is-visible' : ''}`, 'aria-hidden': selectedProject ? 'false' : 'true' },
-              selectedProject && h('article', { className: 'project-detail-card', id: `project-${selectedProject.anchor}`, 'aria-label': selectedProject.title, style: { '--detail-origin': detailOrigin } },
+              selectedProject && h('article', { className: 'project-detail-card', id: `project-${selectedProject.anchor}`, 'aria-label': selectedProject.title[language], style: { '--detail-origin': detailOrigin } },
                 h('div', { className: 'project-detail-top' },
-                  h('span', { className: 'project-detail-kicker' }, `PROJECT / ${selectedProject.type}`),
-                  h('button', { className: 'project-detail-close ui-interactive', type: 'button', onClick: closeProject, 'aria-label': '返回项目转轮' }, 'Back to wheel ↗'),
+                  h('span', { className: 'project-detail-kicker' }, language === 'CN' ? `项目 / ${selectedProject.type[language]}` : `PROJECT / ${selectedProject.type[language]}`),
+                  h('button', { className: 'project-detail-close ui-interactive', type: 'button', onClick: closeProject, 'aria-label': language === 'CN' ? '返回项目转轮' : 'Back to project wheel' }, language === 'CN' ? '返回转轮 ↗' : 'Back to wheel ↗'),
                 ),
                 h('div', { className: 'project-detail-main' },
                   h('p', { className: 'project-detail-index' }, selectedProject.index),
-                  h('h2', { className: 'project-detail-title' }, selectedProject.title),
+                  h('h2', { className: 'project-detail-title' }, selectedProject.title[language]),
                   h('p', { className: 'project-detail-description' }, selectedProject.description[language]),
                   selectedProject.projects && h('div', { className: 'project-project-list', 'aria-label': '项目列表' },
                     selectedProject.projects.map((project) => h('a', { key: project.name, className: 'project-external-link', href: project.href, target: '_blank', rel: 'noreferrer' }, `${project.name} · GitHub ↗`)),
                   ),
                   selectedProject.anchor === 'connect' && h('div', { className: 'project-contact-list', 'aria-label': '个人联系方式' },
                     h('div', { className: 'project-contact-row' },
-                      h('span', { className: 'project-contact-label' }, 'WeChat'),
+                      h('span', { className: 'project-contact-label' }, language === 'CN' ? '微信' : 'WeChat'),
                       h('span', { className: 'project-contact-value' }, 'whynot_yourself'),
                     ),
                     h('div', { className: 'project-contact-row' },
-                      h('span', { className: 'project-contact-label' }, 'Email'),
+                      h('span', { className: 'project-contact-label' }, language === 'CN' ? '邮箱' : 'Email'),
                       h('a', { className: 'project-contact-value', href: 'mailto:chaohongwang04@gmail.com' }, 'chaohongwang04@gmail.com'),
                     ),
                   ),
                 ),
                 h('div', { className: 'project-detail-footer' },
-                  h('span', null, language === '中' ? '点击返回转轮' : 'CLICK BACK TO RETURN'),
+                  h('span', null, language === 'CN' ? '点击返回转轮' : 'CLICK BACK TO RETURN'),
                   h('span', null, `#${selectedProject.anchor}`),
                 ),
               ),
