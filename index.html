@@ -560,20 +560,21 @@
         position: fixed;
         z-index: 1;
         left: 50%;
-        /* 与上移后的猫脚相差约一个光池半径，使中心落在脚底。 */
-        bottom: clamp(5px, 1.1vh, 14px);
+        /* 用同一锚点跟随猫容器，使光池中心精确贴近精灵图的可见脚底。 */
+        bottom: calc(clamp(28px, 3.1vh, 42px) + 11px);
         width: clamp(280px, 32vw, 360px);
         height: clamp(35px, 4vw, 55px);
         transform: translateX(-50%);
         border-radius: 50%;
         /* 透明度只由元素自身 .095–.11 控制，不能再与颜色 alpha 相乘而消失。 */
-        background: radial-gradient(ellipse, rgba(91, 172, 255, .98) 0%, rgba(130, 102, 255, .82) 47%, rgba(48, 26, 116, 0) 76%);
-        filter: blur(30px);
-        opacity: .11;
+        background: radial-gradient(ellipse, rgba(109, 196, 255, 1) 0%, rgba(139, 102, 255, .9) 48%, rgba(48, 26, 116, 0) 78%);
+        box-shadow: 0 0 28px rgba(76, 157, 255, .72), 0 0 54px rgba(131, 86, 255, .42);
+        filter: blur(25px);
+        opacity: .12;
         animation: cat-pool-breathe 7s ease-in-out infinite;
         pointer-events: none;
       }
-      @keyframes cat-pool-breathe { 0%, 100% { opacity: .095; transform: translateX(-50%) scaleX(.96); } 50% { opacity: .11; transform: translateX(-50%) scaleX(1.03); } }
+      @keyframes cat-pool-breathe { 0%, 100% { opacity: .104; transform: translateX(-50%) scaleX(.96); } 50% { opacity: .12; transform: translateX(-50%) scaleX(1.03); } }
       #cat {
         width: 100%;
         max-width: 620px;
@@ -653,8 +654,6 @@
         const meteors = [];
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let nextMeteorAt = 0;
-        let hasShownIntroMeteor = false;
-        let lastIdleMeteorGroupAt = -Infinity;
         let width = 0;
         let height = 0;
         let devicePixelRatio = 1;
@@ -688,7 +687,7 @@
         }
 
         // 常驻环境星点：刻意避开中央猫和转轮区域，留给内容更干净的对比度。
-        const ambientStarCount = window.matchMedia('(max-width: 720px)').matches ? 20 : 46;
+        const ambientStarCount = window.matchMedia('(max-width: 720px)').matches ? 24 : 52;
         for (let index = 0; index < ambientStarCount; index += 1) {
           let x = .1;
           let y = .1;
@@ -701,7 +700,7 @@
             x, y,
             radius: index % 9 === 0 ? 1.8 : .8 + seededRandom() * .4,
             // 仍在 0.08–0.25 的规范内，但抬高下限，静止画面也能读到星空层次。
-            alpha: .12 + seededRandom() * .13,
+            alpha: .16 + seededRandom() * .09,
             color: colors[index % colors.length],
             twinkle: index % 5 === 0,
             phase: seededRandom() * Math.PI * 2,
@@ -817,21 +816,11 @@
 
         function drawMeteors(now) {
           if (reducedMotion) return;
-          const idleFor = now - pointer.lastMovedAt;
-          // 首屏在 Welcome 消退后给出一颗可见的提示性流星；后续仍严格保持低频随机。
-          if (!hasShownIntroMeteor && now > 4200) {
-            spawnMeteor(now);
-            hasShownIntroMeteor = true;
-          }
-          if (!nextMeteorAt) nextMeteorAt = now + 14000 + seededRandom() * 10000;
+          // 用户指定持续流星节奏：每两秒一颗，始终只有一颗处于飞行中。
+          if (!nextMeteorAt) nextMeteorAt = now + 2000;
           if (now >= nextMeteorAt && !meteors.some((meteor) => now >= meteor.startAt && now < meteor.startAt + meteor.duration)) {
             spawnMeteor(now);
-            nextMeteorAt = now + 14000 + seededRandom() * 10000;
-          }
-          if (pointer.active && idleFor > 15000 && now - lastIdleMeteorGroupAt > 30000 && meteors.length === 0) {
-            const count = 2 + Math.floor(seededRandom() * 2);
-            for (let index = 0; index < count; index += 1) spawnMeteor(now, true, index * (400 + seededRandom() * 300));
-            lastIdleMeteorGroupAt = now;
+            nextMeteorAt = now + 2000;
           }
           const live = meteors.filter((meteor) => now < meteor.startAt + meteor.duration);
           meteors.splice(0, meteors.length, ...live);
