@@ -545,7 +545,8 @@
         position: absolute;
         z-index: 2;
         left: 50%;
-        bottom: 0;
+        /* 留出脚底与光池的可见空间，不能再贴着视口边缘。 */
+        bottom: clamp(28px, 3.1vh, 42px);
         width: min(54vw, 620px);
         height: min(83dvh, 680px);
         display: flex;
@@ -559,7 +560,8 @@
         position: fixed;
         z-index: 1;
         left: 50%;
-        bottom: clamp(5px, 1.3vh, 14px);
+        /* 与上移后的猫脚相差约一个光池半径，使中心落在脚底。 */
+        bottom: clamp(5px, 1.1vh, 14px);
         width: clamp(280px, 32vw, 360px);
         height: clamp(35px, 4vw, 55px);
         transform: translateX(-50%);
