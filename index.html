@@ -1685,14 +1685,15 @@
             return `<i class="wheel-particle" aria-hidden="true" style="--particle-x:${x}px;--particle-y:${y}px;--particle-x2:${x2}px;--particle-y2:${y2}px;--particle-size:${size}px;--particle-color:${color};--particle-delay:${delay};--particle-duration:${duration};--particle-opacity:${opacity}"></i>`;
           }).join('');
           const cardPositions = {
-            '-3': { x: 'calc(-1 * min(46vw, 430px))', z: '-190px', rotate: '-24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
-            '-2': { x: 'calc(-1 * min(58vw, 620px))', z: '-105px', rotate: '-16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
+            '-3': { x: 'calc(-1 * min(88vw, 1100px))', z: '-190px', rotate: '-24deg', scale: '.46', opacity: '.16', blur: '1.4px', depth: 1 },
+            // 第二层只保留在视口边缘作为预览，和相邻主卡片完全分离。
+            '-2': { x: 'calc(-1 * min(76vw, 900px))', z: '-135px', rotate: '-16deg', scale: '.56', opacity: '.38', blur: '.8px', depth: 2 },
             // 相邻卡片中心距大于两张缩放后卡片半宽之和，避免线上大屏出现重叠。
             '-1': { x: 'calc(-1 * min(40vw, 500px))', z: '-34px', rotate: '-8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
             '0': { x: '0px', z: '24px', rotate: '0deg', scale: '1', opacity: '1', blur: '0px', depth: 6 },
             '1': { x: 'min(40vw, 500px)', z: '-34px', rotate: '8deg', scale: '.84', opacity: '.78', blur: '.15px', depth: 3 },
-            '2': { x: 'min(58vw, 620px)', z: '-105px', rotate: '16deg', scale: '.68', opacity: '.48', blur: '.6px', depth: 2 },
-            '3': { x: 'min(68vw, 720px)', z: '-190px', rotate: '24deg', scale: '.5', opacity: '.18', blur: '1.4px', depth: 1 },
+            '2': { x: 'min(76vw, 900px)', z: '-135px', rotate: '16deg', scale: '.56', opacity: '.38', blur: '.8px', depth: 2 },
+            '3': { x: 'min(88vw, 1100px)', z: '-190px', rotate: '24deg', scale: '.46', opacity: '.16', blur: '1.4px', depth: 1 },
           };
           const segments = projectItems.map((project, index) => {
             let offset = (index - activeIndex + projectItems.length) % projectItems.length;
