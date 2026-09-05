@@ -263,8 +263,9 @@
         border-radius: clamp(22px, 2.6vw, 34px);
         background: linear-gradient(145deg, rgba(214, 241, 255, .2), rgba(165, 135, 255, .11) 55%, rgba(255, 185, 231, .16));
         box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 0 34px rgba(113, 180, 255, .17);
-        backdrop-filter: blur(17px) saturate(120%);
-        -webkit-backdrop-filter: blur(17px) saturate(120%);
+        /* 较低的毛玻璃采样成本，视觉仍保留柔和折射。 */
+        backdrop-filter: blur(12px) saturate(115%);
+        -webkit-backdrop-filter: blur(12px) saturate(115%);
         transform: translate(-50%, -50%) translateX(var(--card-x)) translateZ(var(--card-z)) translateY(var(--card-hover-y, 0px)) rotateX(var(--card-tilt-x, 0deg)) rotateY(calc(var(--card-rotate) + var(--card-tilt-y, 0deg))) scale(calc(var(--card-scale) * var(--card-interaction-scale, 1)));
         transform-style: preserve-3d;
         color: rgba(244, 250, 255, .84);
@@ -657,6 +658,7 @@
         let width = 0;
         let height = 0;
         let devicePixelRatio = 1;
+        let lastRenderAt = 0;
         let seed = 9137;
 
         function seededRandom() {
@@ -709,7 +711,9 @@
         }
 
         function resize() {
-          devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+          // 背景本身主要由模糊光雾构成；限制离屏画布分辨率，Retina 屏也不会有明显锐度损失。
+          const qualityCap = window.matchMedia('(max-width: 720px)').matches ? 1 : 1.4;
+          devicePixelRatio = Math.min(window.devicePixelRatio || 1, qualityCap);
           width = window.innerWidth;
           height = window.innerHeight;
           canvas.width = Math.floor(width * devicePixelRatio);
@@ -729,29 +733,31 @@
           pointer.active = true;
           pointer.lastMovedAt = performance.now();
           const previous = trails[trails.length - 1];
-          if (!previous || Math.hypot(x - previous.x, y - previous.y) > 18) {
+          const shouldSample = !previous || Math.hypot(x - previous.x, y - previous.y) > 18;
+          if (shouldSample) {
             trails.push({ x, y, createdAt: pointer.lastMovedAt, seed: Math.random() * 50 });
-          }
-          stars.forEach((star) => {
-            const distance = Math.hypot(x - star.x * width, y - star.y * height);
-            const revealRadius = Math.min(width, height) * 0.16;
-            if (distance < revealRadius) {
-              const power = 1 - distance / revealRadius;
-              star.revealedUntil = pointer.lastMovedAt + trailLifetime;
-              star.revealPower = Math.max(star.revealPower, power);
-            }
-          });
-          for (let index = 0; index < 3; index += 1) {
-            sparkles.push({
-              x: x + (seededRandom() - 0.5) * 26,
-              y: y + (seededRandom() - 0.5) * 26,
-              radius: 0.8 + seededRandom() * 2.4,
-              createdAt: pointer.lastMovedAt,
-              color: colors[index % colors.length],
+            // 星尘与星点只在轨迹采样点刷新，保留轨迹密度但避免高刷新鼠标重复生成。
+            stars.forEach((star) => {
+              const distance = Math.hypot(x - star.x * width, y - star.y * height);
+              const revealRadius = Math.min(width, height) * 0.16;
+              if (distance < revealRadius) {
+                const power = 1 - distance / revealRadius;
+                star.revealedUntil = pointer.lastMovedAt + trailLifetime;
+                star.revealPower = Math.max(star.revealPower, power);
+              }
             });
+            for (let index = 0; index < 2; index += 1) {
+              sparkles.push({
+                x: x + (seededRandom() - 0.5) * 26,
+                y: y + (seededRandom() - 0.5) * 26,
+                radius: 0.8 + seededRandom() * 2.4,
+                createdAt: pointer.lastMovedAt,
+                color: colors[index % colors.length],
+              });
+            }
           }
-          while (sparkles.length > 220) sparkles.shift();
-          while (trails.length > 40) trails.shift();
+          while (sparkles.length > 120) sparkles.shift();
+          while (trails.length > 32) trails.shift();
         }
 
         function drawGlow(x, y, radius, color, alpha) {
@@ -879,6 +885,13 @@
         }
 
         function render(now) {
+          const activeCanvasEffect = now - pointer.lastMovedAt < trailLifetime || trails.length > 0 || sparkles.length > 0;
+          const minimumFrameGap = activeCanvasEffect ? 1000 / 45 : 1000 / 30;
+          if (now - lastRenderAt < minimumFrameGap) {
+            requestAnimationFrame(render);
+            return;
+          }
+          lastRenderAt = now;
           pointer.easedX += (pointer.x - pointer.easedX) * 0.085;
           pointer.easedY += (pointer.y - pointer.easedY) * 0.085;
           context.clearRect(0, 0, width, height);
@@ -1022,7 +1035,8 @@
         const palette = ['#ffffff', '#00e5ff', '#5e89ff', '#ff2d95', '#7000ff'];
         const trailLength = 30;
         // 尾迹使用循环对象池，避免鼠标移动时不断创建和销毁对象。
-        const trailPoolSize = 1200;
+        // 保留长寿命与发射密度，但按设备降低未使用的粒子槽位。
+        const trailPoolSize = window.matchMedia('(max-width: 720px)').matches ? 520 : 760;
         const wingFlapSpeed = 7.2;
         const followEase = 0.18;
         const seeded = (value) => {
@@ -1115,7 +1129,12 @@
 
         const THREE = window.THREE;
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        // 点精灵与柔光均会自然抗锯齿；限制高 DPI 渲染缓冲，避免 4K / Retina 设备的像素成本倍增。
+        const renderPixelRatio = () => Math.min(
+          window.devicePixelRatio || 1,
+          window.matchMedia('(max-width: 720px)').matches ? 1 : 1.5,
+        );
+        renderer.setPixelRatio(renderPixelRatio());
         renderer.setClearColor(0x000000, 0);
         const scene = new THREE.Scene();
         const camera = new THREE.OrthographicCamera(-innerWidth / 2, innerWidth / 2, innerHeight / 2, -innerHeight / 2, 1, 1000);
@@ -1251,6 +1270,7 @@
         butterflyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         butterflyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         butterflyGeometry.setAttribute('aPhase', new THREE.BufferAttribute(particlePhases, 1));
+        butterflyGeometry.getAttribute('position').setUsage(THREE.DynamicDrawUsage);
         const particleVertexShader = `
           attribute float aPhase;
           uniform float uTime;
@@ -1315,7 +1335,10 @@
           x: 0, y: 0, z: -2, vx: 0, vy: 0, vz: 0, age: 9999, life: 1, size: 1,
           seed: seeded(index + 700), colorIndex: index % palette.length,
         }));
+        // 只遍历仍在屏幕中的粒子，而非每帧扫描整个循环池。
+        const activeTrailIndices = new Set();
         let poolCursor = 0;
+        let trailAttributesDirty = false;
         const trailGeometry = new THREE.BufferGeometry();
         const trailPositions = new Float32Array(trailPoolSize * 3);
         const trailColors = new Float32Array(trailPoolSize * 3);
@@ -1326,6 +1349,12 @@
         trailGeometry.setAttribute('color', new THREE.BufferAttribute(trailColors, 3));
         trailGeometry.setAttribute('aSize', new THREE.BufferAttribute(trailSizes, 1));
         trailGeometry.setAttribute('aAlpha', new THREE.BufferAttribute(trailAlphas, 1));
+        [
+          trailGeometry.getAttribute('position'),
+          trailGeometry.getAttribute('color'),
+          trailGeometry.getAttribute('aSize'),
+          trailGeometry.getAttribute('aAlpha'),
+        ].forEach((attribute) => attribute.setUsage(THREE.DynamicDrawUsage));
         // GLSL 将每个点绘制成柔边圆形，并读取对象池写入的尺寸 / 透明度。
         const trailMaterial = new THREE.ShaderMaterial({
           uniforms: { uSprite: { value: glowTexture } },
@@ -1385,6 +1414,7 @@
           camera.top = height / 2;
           camera.bottom = -height / 2;
           camera.updateProjectionMatrix();
+          renderer.setPixelRatio(renderPixelRatio());
           renderer.setSize(width, height, false);
         };
         const move = (x, y) => {
@@ -1405,8 +1435,11 @@
           canvas.classList.add('is-visible');
         };
         const emitTrailParticle = (originX, originY, directionX, directionY, energy, seedValue) => {
-          const particle = trailPool[poolCursor];
+          const particleIndex = poolCursor;
+          const particle = trailPool[particleIndex];
           poolCursor = (poolCursor + 1) % trailPoolSize;
+          activeTrailIndices.add(particleIndex);
+          trailAttributesDirty = true;
           const spread = (seeded(seedValue + 1) - .5) * 1.7;
           const directionAngle = Math.atan2(directionY, directionX) + spread;
           const launchSpeed = .08 + seeded(seedValue + 2) * .28 + energy * .014;
@@ -1514,42 +1547,54 @@
           const trailColorAttribute = trailGeometry.getAttribute('color');
           const trailSizeAttribute = trailGeometry.getAttribute('aSize');
           const trailAlphaAttribute = trailGeometry.getAttribute('aAlpha');
-          trailPool.forEach((particle, index) => {
-            const alive = particle.age < particle.life;
-            if (alive) {
-              particle.age += deltaTime;
-              // 低频正弦扰动模拟轻微湍流，随后用阻尼让粒子自然散开并停下。
-              particle.vx += Math.sin(time * .002 + particle.seed) * .0025 * deltaTime;
-              particle.vy += Math.cos(time * .0017 + particle.seed * 1.7) * .0025 * deltaTime;
-              particle.vz += Math.sin(time * .0013 + particle.seed * 1.3) * .00035 * deltaTime;
-              particle.x += particle.vx * deltaTime;
-              particle.y += particle.vy * deltaTime;
-              particle.z += particle.vz * deltaTime;
-              const damping = Math.pow(.994, deltaTime / 16);
-              particle.vx *= damping;
-              particle.vy *= damping;
-              particle.vz *= damping;
+          activeTrailIndices.forEach((index) => {
+            const particle = trailPool[index];
+            if (particle.age >= particle.life) {
+              trailPositionAttribute.array[index * 3] = 99999;
+              trailPositionAttribute.array[index * 3 + 1] = 99999;
+              trailPositionAttribute.array[index * 3 + 2] = 99999;
+              trailSizeAttribute.array[index] = 0;
+              trailAlphaAttribute.array[index] = 0;
+              activeTrailIndices.delete(index);
+              trailAttributesDirty = true;
+              return;
             }
-            const progress = alive ? Math.min(1, particle.age / particle.life) : 1;
-            const fadeIn = alive ? Math.min(1, particle.age / 110) : 0;
-            const fadeOut = alive ? Math.pow(1 - progress, 1.55) : 0;
+            particle.age += deltaTime;
+            // 低频正弦扰动模拟轻微湍流，随后用阻尼让粒子自然散开并停下。
+            particle.vx += Math.sin(time * .002 + particle.seed) * .0025 * deltaTime;
+            particle.vy += Math.cos(time * .0017 + particle.seed * 1.7) * .0025 * deltaTime;
+            particle.vz += Math.sin(time * .0013 + particle.seed * 1.3) * .00035 * deltaTime;
+            particle.x += particle.vx * deltaTime;
+            particle.y += particle.vy * deltaTime;
+            particle.z += particle.vz * deltaTime;
+            const damping = Math.pow(.994, deltaTime / 16);
+            particle.vx *= damping;
+            particle.vy *= damping;
+            particle.vz *= damping;
+            const progress = Math.min(1, particle.age / particle.life);
+            const fadeIn = Math.min(1, particle.age / 110);
+            const fadeOut = Math.pow(1 - progress, 1.55);
             const fade = Math.min(fadeIn, fadeOut);
             const startColor = colorObjects[particle.colorIndex % 4];
             const endColor = colorObjects[4];
             const colorMix = Math.min(1, progress * 1.15);
-            trailPositionAttribute.array[index * 3] = alive ? particle.x - innerWidth / 2 : 99999;
-            trailPositionAttribute.array[index * 3 + 1] = alive ? innerHeight / 2 - particle.y : 99999;
+            trailPositionAttribute.array[index * 3] = particle.x - innerWidth / 2;
+            trailPositionAttribute.array[index * 3 + 1] = innerHeight / 2 - particle.y;
             trailPositionAttribute.array[index * 3 + 2] = particle.z;
             trailColorAttribute.array[index * 3] = startColor.r + (endColor.r - startColor.r) * colorMix;
             trailColorAttribute.array[index * 3 + 1] = startColor.g + (endColor.g - startColor.g) * colorMix;
             trailColorAttribute.array[index * 3 + 2] = startColor.b + (endColor.b - startColor.b) * colorMix;
-            trailSizeAttribute.array[index] = alive ? particle.size * (.25 + fade * .95) : 0;
+            trailSizeAttribute.array[index] = particle.size * (.25 + fade * .95);
             trailAlphaAttribute.array[index] = fade;
+            trailAttributesDirty = true;
           });
-          trailPositionAttribute.needsUpdate = true;
-          trailColorAttribute.needsUpdate = true;
-          trailSizeAttribute.needsUpdate = true;
-          trailAlphaAttribute.needsUpdate = true;
+          if (trailAttributesDirty) {
+            trailPositionAttribute.needsUpdate = true;
+            trailColorAttribute.needsUpdate = true;
+            trailSizeAttribute.needsUpdate = true;
+            trailAlphaAttribute.needsUpdate = true;
+            trailAttributesDirty = false;
+          }
           glowMaterial.uniforms.uAlpha.value += ((idle ? .04 : .10) - glowMaterial.uniforms.uAlpha.value) * Math.min(1, deltaTime * .008);
           glowMaterial.uniforms.uTime.value = time;
           coreMaterial.uniforms.uTime.value = time;
@@ -1645,6 +1690,8 @@
       }
       function showFrame(atlasFrame) {
         const frame = Math.round(((atlasFrame % atlas.frameCount) + atlas.frameCount) % atlas.frameCount);
+        if (frame === displayedAtlasFrame) return;
+        displayedAtlasFrame = frame;
         const column = frame % atlas.columns;
         const row = Math.floor(frame / atlas.columns);
         cat.style.backgroundPosition = `${(column / (atlas.columns - 1)) * 100}% ${(row / (atlas.rows - 1)) * 100}%`;
@@ -1652,6 +1699,7 @@
 
       let targetSourceFrame = 240;
       let displayedSourceFrame = 240;
+      let displayedAtlasFrame = null;
       let animationFrameId = null;
       let lastAngle = -45;
       function easeDisplayedFrame() {
@@ -1693,7 +1741,18 @@
         };
         setTargetFrame(sourceFrame);
       }
-      window.addEventListener('pointermove', (event) => updateFromPointer(event.clientX, event.clientY), { passive: true });
+      // 原始 pointermove 在高刷鼠标上可达数百次/秒；合并至一帧一次，避免同一帧重复改写场景和猫帧。
+      let pendingPointerPosition = null;
+      let pointerUpdateRequest = null;
+      window.addEventListener('pointermove', (event) => {
+        pendingPointerPosition = { x: event.clientX, y: event.clientY };
+        if (pointerUpdateRequest !== null) return;
+        pointerUpdateRequest = requestAnimationFrame(() => {
+          pointerUpdateRequest = null;
+          const position = pendingPointerPosition;
+          if (position) updateFromPointer(position.x, position.y);
+        });
+      }, { passive: true });
       // 视觉鼠标始终跟随真实指针；交互元素才显示细环，不干扰系统可访问性。
       (() => {
         const dot = document.getElementById('cursor-dot');
